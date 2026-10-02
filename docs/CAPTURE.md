@@ -56,7 +56,7 @@ The child should pin WantWise to the front of the share sheet's app row once (Sh
 | A Share Extension is a **separate process** with its own lifecycle, launched by the host app, and can be terminated once it completes or if it misbehaves. | All capture work must finish before `completeRequest`. Writes must be atomic. |
 | Share Extensions have a **much lower memory limit** than apps (commonly ~120 MB; not formally documented). Decoding a full-resolution image naively (e.g. a Safari full-page screenshot) can get the extension killed. | Downsample with ImageIO (`CGImageSourceCreateThumbnailAtIndex`) directly from the file/data — never load the full `UIImage`. |
 | **No supported way to open the containing app** from a Share Extension. `NSExtensionContext.open(_:)` is only supported for Today/widget-style extensions; responder-chain `openURL` tricks are unsupported and fragile. | The extension must complete the whole capture itself. It cannot "hand off to the app to finish". |
-| The extension and the app only share data via an **App Group** container (shared files, shared `UserDefaults`, or a shared database file). | Both targets get the same App Group entitlement (`group.<bundle-prefix>.wantwise`). |
+| The extension and the app only share data via an **App Group** container (shared files, shared `UserDefaults`, or a shared database file). | Both targets get the same App Group entitlement (build setting `WANTWISE_APP_GROUP`, placeholder `group.tech.wantwise.app`). Used **only** for the inbox (D-019). |
 | The extension declares what it accepts in `NSExtensionActivationRule` in its Info.plist. | Accept: 1 image, 1 web URL, text. |
 | Safari's screenshot UI can produce a **"Full Page" PDF** instead of an image. | V1: accept images and URLs; treat PDF as a stretch (render page 1 to an image). [MAC REQUIRED to verify behaviour] |
 | Item providers are async (`NSItemProvider.loadFileRepresentation` / `loadItem`). Shared items may arrive as file URLs, `Data`, or `UIImage`, depending on the host app. | Handle `public.image` via file representation first, fall back to data. |
@@ -82,7 +82,7 @@ Share Extension                              Main app
    d. completeRequest
                                              On launch / scenePhase .active:
                                              5. scan Inbox/*.json
-                                             6. move image → Images/<uuid>.jpg
+                                             6. move image → app container Images/<uuid>.jpg
                                              7. insert Want (status captured or waiting),
                                                 skip if id already exists (idempotent)
                                              8. delete inbox files
@@ -109,7 +109,7 @@ Store as `details`, first line (truncated) as title. If the text contains a URL,
 
 ## Image storage
 
-- `Application Support`-style directory inside the **App Group** container: `Images/<want-uuid>.jpg` (App Group so the extension and future widget can read it).
+- `Application Support/Images/<want-uuid>.jpg` in the **app's own container** (D-019). The extension writes its downsampled image into the App Group `Inbox/`; the app moves it into `Images/` on import. Only the inbox depends on the team-registered App Group ID.
 - Max 2048 px long edge, JPEG ~0.8 quality. A tall screenshot stays readable; typical size 200–600 KB.
 - A small thumbnail can be derived on demand; not stored separately in V1.
 - Milestone 3: uploaded to Supabase Storage at `family/<familyId>/wants/<wantId>.jpg`. See ARCHITECTURE.md → Image sync.

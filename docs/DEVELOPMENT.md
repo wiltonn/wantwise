@@ -35,7 +35,7 @@ Cloud Mac: pull ─▶ xcodegen generate ─▶ build/test ─▶ fix ─▶ com
 - Code signing, App ID / App Group registration, capabilities
 - Archiving, uploading to App Store Connect / TestFlight
 
-**Important**: a cloud Mac can't be plugged into the iPhone, so "Run on device" from Xcode isn't practical. **TestFlight is the delivery path** to the child's phone. That needs a paid Apple Developer Program membership (US$99/yr). Free personal-team signing also expires apps after 7 days, which doesn't work when the Mac is only rented occasionally.
+**Important**: a cloud Mac can't be plugged into the iPhone, so "Run on device" from Xcode isn't practical. **TestFlight is the delivery path** to the child's phone. Signing and TestFlight are handled by a friend's Apple Developer account (DECISIONS.md D-018). Their instructions are in [APPLE_HANDOFF.md](APPLE_HANDOFF.md). The project owner's own enrolment is **not** required.
 
 ## WSL setup
 
@@ -43,9 +43,12 @@ Cloud Mac: pull ─▶ xcodegen generate ─▶ build/test ─▶ fix ─▶ com
 # Node (already present: v22 via nvm)
 node -v
 
-# Swift toolchain for WantWiseCore tests (optional but recommended)
+# Swift toolchain for WantWiseCore tests (installed 2026-10-02: Swift 6.4.0 via swiftly)
 curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz
 tar zxf swiftly-$(uname -m).tar.gz && ./swiftly init
+# swiftly prints the system packages the toolchain needs. On Ubuntu 24.04 (needs sudo, once):
+sudo apt-get -y install zip gnupg2 libcurl4-openssl-dev libxml2-dev libncurses-dev libz3-dev pkg-config
+source ~/.local/share/swiftly/env.sh   # swiftly adds this to your shell profile
 swift --version
 
 # Supabase CLI (Milestone 3)
@@ -59,59 +62,51 @@ Commands:
 cd apps/ios/WantWiseCore && swift test
 
 # Display
-cd apps/display && npm install && npm run dev     # http://localhost:3000/display
-npm test
+cd apps/display && npm install
+npm run dev                # http://localhost:3000/display   (F = full screen, ←/→ = previous/next)
+npm test                   # Vitest
+npm run typecheck
+npm run build && npm start # production mode, best for leaving on a screen
 ```
 
-## Before the first Cloud Mac session (do these first — they cost no Mac time)
+## Before the first signed build (no Mac time needed)
 
-- [ ] Enrol in the **Apple Developer Program** (can take 24–48 h to approve). Note your **Team ID**.
-- [ ] Decide bundle ID prefix, e.g. `com.<yourname>.wantwise`. Record it in `apps/ios/Config/Base.xcconfig`.
-- [ ] Check the child's iPhone **iOS version** (Settings → General → About). Must be ≥ the deployment target (planned iOS 18.0).
-- [ ] Push the repo to GitHub (remote already set: `wiltonn/wantwise`).
-- [ ] In App Store Connect, create the app record "WantWise" (can be done from any browser).
-- [ ] Have the child's Apple ID email ready to add as a TestFlight internal/external tester.
+- [ ] Check the child's iPhone **iOS version** (Settings → General → About). This decides D-021 (iOS 17 vs 18 minimum).
+- [ ] Agree final bundle IDs and App Group with the signing partner (D-022). Placeholders: `tech.wantwise.app`, `tech.wantwise.app.share`, `group.tech.wantwise.app`.
+- [ ] Partner reads "Ownership implications" in [APPLE_HANDOFF.md](APPLE_HANDOFF.md).
+- [ ] Have the child's and owner's Apple ID emails ready for TestFlight.
 
-## First Cloud Mac session checklist [MAC REQUIRED]
+## First Mac session [MAC REQUIRED]
 
-Goal: Milestone 1 running in the Simulator and delivered to the iPhone via TestFlight. Budget ~3–4 hours.
+Two possible routes. Either works; the repo is the same.
+
+**A. The signing partner does it all**: follow [APPLE_HANDOFF.md](APPLE_HANDOFF.md). Compile errors get reported back (or fixed and pushed).
+
+**B. The owner rents a cloud Mac to get the build green first**, then the partner only signs and uploads. This is cheaper in the partner's time and is recommended for the very first build, because hand-written SwiftUI is likely to need fixes.
+
+Route B checklist (no signing needed for the Simulator):
 
 ```bash
-# 1. Tooling
-xcode-select -p                          # confirm Xcode is installed (latest stable)
-xcodebuild -version
-brew install xcodegen                    # if Homebrew present; else: mint install yonaskolb/XcodeGen
-
-# 2. Repo
+xcodebuild -version                      # latest stable Xcode
+brew install xcodegen
 git clone https://github.com/wiltonn/wantwise.git && cd wantwise/apps/ios
-git config user.name "Nate" && git config user.email "<your email>"
 
-# 3. Core package tests (should already pass from WSL)
-cd WantWiseCore && swift test && cd ..
+# 1. Core package (already verified on Linux; confirm on macOS)
+(cd WantWiseCore && swift test)
 
-# 4. Generate and open project
+# 2. Generate project (no Team ID needed for Simulator builds)
 xcodegen generate
-open WantWise.xcodeproj
+
+# 3. Build + test in Simulator
+xcrun simctl list devices available | grep iPhone
+xcodebuild -scheme WantWise -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -scheme WantWise -destination 'platform=iOS Simulator,name=iPhone 16' test
 ```
 
-5. **Xcode → Settings → Accounts**: sign in with the Apple ID on the Developer Program team.
-6. Select the `WantWise` target → Signing & Capabilities → confirm *Automatically manage signing* with your Team. (Team ID comes from `Config/Base.xcconfig`; if Xcode wants to change anything, change the xcconfig/project.yml instead and regenerate.)
-7. Confirm the **App Group** `group.<bundle-prefix>.wantwise` is registered (Xcode does this with automatic signing; otherwise developer.apple.com → Identifiers → App Groups).
-8. Build and run in Simulator:
-   ```bash
-   xcodebuild -scheme WantWise -destination 'platform=iOS Simulator,name=iPhone 16' build
-   xcodebuild -scheme WantWise -destination 'platform=iOS Simulator,name=iPhone 16' test
-   ```
-   (Use `xcrun simctl list devices available` to pick a simulator name that exists.)
-9. Fix compile errors. **Commit and push after each meaningful fix** — don't hoard changes on the rented Mac.
-10. Walk through the Milestone 1 checklist in the Simulator (add, relaunch, reconsider, notification via changing a Want's date to 1 minute ahead in a debug build).
-11. Archive and upload:
-    - Product → Archive (scheme `WantWise`, destination *Any iOS Device*)
-    - Organizer → Distribute App → App Store Connect → Upload
-12. App Store Connect → TestFlight: add yourself and the child's Apple ID as testers. Install **TestFlight** on the child's iPhone and accept.
-13. `git status` clean, everything pushed. Write down anything surprising in `docs/DECISIONS.md`.
-
-TestFlight builds expire after 90 days — plan a Mac session (or CI) at least that often.
+4. Fix compile errors. **Commit and push after each fix**, not at the end.
+5. Walk through the Milestone 1 checklist in the Simulator (`open WantWise.xcodeproj`, run): add, relaunch, reconsider, and a notification test using a debug revisit date 1 minute ahead.
+6. If D-021 chose iOS 17: also run the test command against an iOS 17 Simulator runtime.
+7. Update [VERIFICATION.md](VERIFICATION.md) with what was actually verified. Push.
 
 ## Testing strategy
 
@@ -127,6 +122,8 @@ TestFlight builds expire after 90 days — plan a Mac session (or CI) at least t
 | Integration (iPhone → Supabase → Display) | Manual end-to-end check per release | All |
 
 Keep it small. Push as much logic as possible into `WantWiseCore` and `lib/domain.ts`, where it's cheap to test.
+
+What has actually been verified, and where, is tracked in [VERIFICATION.md](VERIFICATION.md).
 
 ## Display kiosk setup (Milestone 4)
 

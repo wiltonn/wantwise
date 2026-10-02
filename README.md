@@ -39,6 +39,8 @@ wantwise/
 - [IOS_ROADMAP.md](docs/IOS_ROADMAP.md) — Milestones 1–4
 - [DEVELOPMENT.md](docs/DEVELOPMENT.md) — WSL vs. Mac workflow, Cloud Mac checklist, testing
 - [DECISIONS.md](docs/DECISIONS.md) — dated decision log (append-only)
+- [VERIFICATION.md](docs/VERIFICATION.md) — what has actually been tested, and where
+- [APPLE_HANDOFF.md](docs/APPLE_HANDOFF.md) — instructions for the signing/TestFlight partner
 
 ## Development model
 

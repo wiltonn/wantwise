@@ -7,7 +7,7 @@
 ┌───────────────────────────────────────────┐
 │ iPhone                                    │
 │  ┌──────────────┐   App Group container   │
-│  │ Share Ext.   │──▶ Inbox/  Images/      │
+│  │ Share Ext.   │──▶ Inbox/ (only)        │
 │  └──────────────┘        │                │        ┌──────────────────────┐
 │  ┌──────────────────────▼──────────────┐  │  sync  │ Supabase             │
 │  │ WantWise app                        │◀─┼───────▶│  Auth (parent)       │
@@ -78,7 +78,7 @@ Local only. One pending request per waiting Want, identifier = `want-<uuid>`, fi
 
 ### Minimum iOS version
 
-**iOS 18.0** (SwiftData's iOS 17 release had rough edges fixed in 18). Lower only if the child's phone requires it — check the phone's iOS version before the first Mac session.
+**iOS 18.0, provisional** (D-021). No iOS-18-only API is used in Milestones 1–2, so iOS 17 is possible with only an extra Simulator test pass. Decided from the child's phone before the first Xcode build.
 
 ## Display
 
