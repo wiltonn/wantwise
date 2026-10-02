@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9cbb8"/><stop offset="1" stop-color="#9c8b77"/></linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d5a48"/><stop offset="1" stop-color="#3b2f25"/></linearGradient>
+    <linearGradient id="deck" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2a9d8f"/><stop offset=".5" stop-color="#e9c46a"/><stop offset="1" stop-color="#e76f51"/></linearGradient>
+    <radialGradient id="vig" cx=".5" cy=".45" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .18 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1600" height="800" fill="url(#wall)"/>
+  <rect y="780" width="1600" height="420" fill="url(#floor)"/>
+  <rect x="120" y="120" width="150" height="520" rx="70" fill="#264653" opacity=".55" filter="url(#soft)"/><rect x="360" y="120" width="150" height="520" rx="70" fill="#e76f51" opacity=".55" filter="url(#soft)"/><rect x="600" y="120" width="150" height="520" rx="70" fill="#8ab17d" opacity=".55" filter="url(#soft)"/><rect x="840" y="120" width="150" height="520" rx="70" fill="#f4a261" opacity=".55" filter="url(#soft)"/><rect x="1080" y="120" width="150" height="520" rx="70" fill="#3d5a80" opacity=".55" filter="url(#soft)"/><rect x="1320" y="120" width="150" height="520" rx="70" fill="#b5838d" opacity=".55" filter="url(#soft)"/>
+  <ellipse cx="820" cy="930" rx="560" ry="70" fill="#000" opacity=".35" filter="url(#soft)"/>
+  <g transform="translate(800 820) rotate(-6)">
+    <rect x="-560" y="-70" width="1120" height="140" rx="70" fill="url(#deck)"/>
+    <rect x="-560" y="-70" width="1120" height="40" rx="20" fill="#fff" opacity=".18"/>
+    <rect x="-450" y="60" width="140" height="26" rx="8" fill="#b0b0b0"/>
+      <circle cx="-450" cy="112" r="44" fill="#f2e8cf"/><circle cx="-310" cy="112" r="44" fill="#f2e8cf"/>
+      <circle cx="-450" cy="112" r="16" fill="#999"/><circle cx="-310" cy="112" r="16" fill="#999"/><rect x="310" y="60" width="140" height="26" rx="8" fill="#b0b0b0"/>
+      <circle cx="310" cy="112" r="44" fill="#f2e8cf"/><circle cx="450" cy="112" r="44" fill="#f2e8cf"/>
+      <circle cx="310" cy="112" r="16" fill="#999"/><circle cx="450" cy="112" r="16" fill="#999"/>
+  </g>
+  <rect x="1180" y="560" width="220" height="130" rx="10" fill="#fdfcf7" transform="rotate(4 1290 625)"/>
+  <text x="1290" y="645" text-anchor="middle" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="56" font-weight="800" fill="#222" transform="rotate(4 1290 625)">$74.99</text>
+  <rect width="1600" height="1200" fill="url(#vig)"/>
+  <rect width="1600" height="1200" filter="url(#grain)" opacity=".6"/>
+</svg>

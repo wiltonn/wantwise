@@ -81,3 +81,6 @@ Milestone 1–2 code depends on **no iOS-18-only API**. iOS-18-only features we 
 
 ### D-022 — Proposed identifier namespace `tech.wantwise` · 2026-10-02 · Open (confirm with the friend's account before first signed build)
 Placeholders: app `tech.wantwise.app`, share extension `tech.wantwise.app.share`, App Group `group.tech.wantwise.app`. Defined once in `apps/ios/Config/Base.xcconfig` and overridable in `Signing.local.xcconfig`. Nothing is registered yet. Bundle IDs don't require owning the matching domain, but they must be globally unique and the namespace may already be registered by someone else.
+
+### D-023 — Display uses a fixed 1920×1080 stage, scaled to fit · 2026-10-02 · Accepted
+Rather than reflowing the layout per screen size, the Display is composed once at 1920×1080 and scaled uniformly (`transform: scale`), with the scale set before first paint. A household screen is viewed from a distance as one composition; this keeps the design identical on 1080p, 4K and laptop screens and keeps the CSS simple. Revisit if a portrait or very different aspect-ratio screen becomes a target.

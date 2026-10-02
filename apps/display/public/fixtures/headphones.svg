@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1170 2532" width="1170" height="2532">
+  <rect width="1170" height="2532" fill="#ffffff"/>
+  
+  <text x="96" y="104" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="46" font-weight="600" fill="#111216">9:41</text>
+  <g fill="#111216">
+    <rect x="890" y="72" width="12" height="30" rx="3" opacity=".9"/><rect x="910" y="64" width="12" height="38" rx="3"/>
+    <rect x="930" y="56" width="12" height="46" rx="3"/><rect x="950" y="48" width="12" height="54" rx="3" opacity=".35"/>
+    <rect x="990" y="56" width="86" height="44" rx="12" fill="none" stroke="#111216" stroke-width="4" opacity=".5"/>
+    <rect x="997" y="63" width="60" height="30" rx="7"/>
+  </g>
+  <path d="M110 214l-34 34 34 34" fill="none" stroke="#111216" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="170" y="186" width="760" height="100" rx="50" fill="#f3f2ef"/>
+  <circle cx="232" cy="234" r="20" fill="none" stroke="#6b6e76" stroke-width="7"/><path d="M247 250l18 18" stroke="#6b6e76" stroke-width="7" stroke-linecap="round"/>
+  <text x="286" y="250" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="42" fill="#6b6e76">Search</text>
+  <path d="M990 206h22l20 76h92l18-56h-122" fill="none" stroke="#111216" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="1046" cy="306" r="11" fill="#111216"/><circle cx="1110" cy="306" r="11" fill="#111216"/>
+  <rect x="0" y="340" width="1170" height="1300" fill="#f3f2ef"/>
+  <g transform="translate(0 340)">
+  <defs>
+    <linearGradient id="hp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b6170"/><stop offset="1" stop-color="#1d2028"/></linearGradient>
+    <linearGradient id="cush" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3e48"/><stop offset="1" stop-color="#14161b"/></linearGradient>
+    <radialGradient id="shadow"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="585" cy="1080" rx="380" ry="60" fill="url(#shadow)"/>
+  <path d="M300 720 C300 330 870 330 870 720" fill="none" stroke="url(#hp)" stroke-width="64" stroke-linecap="round"/>
+  <path d="M330 690 C330 390 840 390 840 690" fill="none" stroke="#7a8090" stroke-width="10" opacity=".5"/>
+  <rect x="210" y="640" width="210" height="360" rx="100" fill="url(#hp)"/>
+  <rect x="750" y="640" width="210" height="360" rx="100" fill="url(#hp)"/>
+  <rect x="380" y="680" width="70" height="280" rx="35" fill="url(#cush)"/>
+  <rect x="720" y="680" width="70" height="280" rx="35" fill="url(#cush)"/>
+  <ellipse cx="290" cy="720" rx="40" ry="90" fill="#fff" opacity=".12"/>
+  <ellipse cx="830" cy="720" rx="40" ry="90" fill="#fff" opacity=".12"/>
+  <circle cx="855" cy="930" r="12" fill="#6fe3a5"/></g>
+  <g><circle cx="505" cy="1600" r="10" fill="#111216" opacity="1"/><circle cx="545" cy="1600" r="10" fill="#6b6e76" opacity="0.4"/><circle cx="585" cy="1600" r="10" fill="#6b6e76" opacity="0.4"/><circle cx="625" cy="1600" r="10" fill="#6b6e76" opacity="0.4"/><circle cx="665" cy="1600" r="10" fill="#6b6e76" opacity="0.4"/></g>
+  <text x="96" y="1742" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="40" fill="#ff7a1a" font-weight="600">Auralite</text>
+  <text x="96" y="1822" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="62" font-weight="700" fill="#111216">Wireless Over-Ear</text><text x="96" y="1894" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="62" font-weight="700" fill="#111216">Headphones, 40h battery</text>
+  <path transform="translate(96 1946) scale(1.9)" d="M10 1l2.9 6 6.6.9-4.8 4.6 1.2 6.5L10 16l-5.9 3 1.2-6.5L.5 7.9 7.1 7z" fill="#f5a623"/><path transform="translate(148 1946) scale(1.9)" d="M10 1l2.9 6 6.6.9-4.8 4.6 1.2 6.5L10 16l-5.9 3 1.2-6.5L.5 7.9 7.1 7z" fill="#f5a623"/><path transform="translate(200 1946) scale(1.9)" d="M10 1l2.9 6 6.6.9-4.8 4.6 1.2 6.5L10 16l-5.9 3 1.2-6.5L.5 7.9 7.1 7z" fill="#f5a623"/><path transform="translate(252 1946) scale(1.9)" d="M10 1l2.9 6 6.6.9-4.8 4.6 1.2 6.5L10 16l-5.9 3 1.2-6.5L.5 7.9 7.1 7z" fill="#f5a623"/><path transform="translate(304 1946) scale(1.9)" d="M10 1l2.9 6 6.6.9-4.8 4.6 1.2 6.5L10 16l-5.9 3 1.2-6.5L.5 7.9 7.1 7z" fill="#f5a623"/>
+  <text x="370" y="1982" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="40" fill="#6b6e76">4.6 · 2,318 ratings</text>
+  <text x="96" y="2124" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="96" font-weight="700" fill="#111216">$49.00</text>
+  <text x="96" y="2192" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="40" fill="#2e9e5b" font-weight="600">In stock · Free delivery Tue</text>
+  <rect x="96" y="2262" width="978" height="128" rx="64" fill="#ff7a1a"/>
+  <text x="585" y="2343" text-anchor="middle" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="48" font-weight="700" fill="#fff">Add to cart</text>
+  <rect x="420" y="2480" width="330" height="14" rx="7" fill="#111216" opacity=".85"/>
+</svg>

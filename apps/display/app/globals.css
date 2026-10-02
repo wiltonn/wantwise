@@ -1,0 +1,41 @@
+/* WantWise visual tokens. The iPhone app uses the same accent and neutrals (DISPLAY.md → Visual system). */
+:root {
+  --bg: #0a0b0e;
+  --surface: #15171c;
+  --surface-raised: #1c1f26;
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #f5f3ee;
+  --text-muted: rgba(245, 243, 238, 0.62);
+  --text-faint: rgba(245, 243, 238, 0.4);
+  /* The single accent: warm amber. Used for "ready" and the active item, nothing else. */
+  --accent: #f3c46b;
+  --accent-ink: #1b1407;
+  --radius-lg: 32px;
+  --radius-md: 20px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

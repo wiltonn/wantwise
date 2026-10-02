@@ -58,7 +58,8 @@ The display can rotate between scenes every few minutes. V1 ships **Thinking Abo
 ## Visual system
 
 - **Dark background** (near-black, not pure black), off-white text, one restrained accent colour shared with the iPhone app. Subtle depth: soft shadows, slightly raised cards, gentle gradient.
-- **Typography**: one variable sans (e.g. Inter or a similar Google Font, self-hosted via `next/font`), large and tight. At 1080p: hero title ~72 px, body ~32 px, minimum anything ~24 px. Sized with `clamp()`/viewport units so 4K scales cleanly.
+- **Typography**: Inter Tight (display) + Inter (body), self-hosted via `next/font` (no requests to Google at runtime). At 1080p: hero title 76 px, reason 38 px, minimum anything ~22 px.
+- **Scaling**: the whole Display is laid out on a fixed **1920×1080 stage** and scaled uniformly to the window (D-023). 4K renders at 2× and stays sharp; a 1366×768 laptop gets the identical composition at 0.71×. Non-16:9 screens get a letterbox with the ambient background.
 - **Motion**: cross-fades and slow (≥600 ms) transitions only. Respect `prefers-reduced-motion`.
 - **Readable from ~3 m**: test by standing back from the screen.
 
@@ -107,6 +108,15 @@ apps/display/
 - **Refresh**: client polls `/api/snapshot` every 60 s and swaps state. Supabase Realtime is a later option if 60 s feels slow (it won't for this use).
 - **Dependencies**: `next`, `react`, `@supabase/ssr` + `@supabase/supabase-js` (Milestone 4), `vitest` (dev). No UI kit, no state library, no CSS framework.
 - **Hosting**: either Vercel (free tier) or `next start` on the household PC itself. Decide at Milestone 4; nothing in the design depends on it.
+
+## Prototype (2026-10-02)
+
+Fixture-backed, running in WSL. Screenshots: `docs/display-screens/`.
+
+- `?feature=N` starts on a given Want (design review / screenshots).
+- **F** toggles full screen; **←/→** step through Wants; the cursor and the full-screen button hide after 3 s idle.
+- Placeholder "screenshots" are generated SVGs (`npm run fixtures:images`) imitating phone screenshots of store pages, a photo and a link preview, so the layout is judged with realistic aspect ratios.
+- Fixture dates are relative to *now*, so countdowns always look realistic. One fixture Want is hidden from the Display and one is soft-deleted; tests prove neither appears.
 
 ## Testing
 
