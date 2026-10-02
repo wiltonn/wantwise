@@ -39,3 +39,6 @@ apps/ios/Config/Signing.local.xcconfig
 # iOS build output
 apps/ios/build/
 apps/ios/build-logs/
+
+# Claude Code personal settings
+.claude/settings.local.json

@@ -28,6 +28,7 @@ _Last updated: 2026-10-02 (before any Mac session)_
 | Asset catalog JSON valid; icon 1024², RGB (no alpha) | ✅ | `json.tool`, Pillow |
 | Xcode opens/builds the generated project | 📝 | |
 | Simulator build with no team (D-026) | 📝 | Fallback documented: `CODE_SIGNING_ALLOWED=NO` |
+| `scripts/mac-bootstrap.sh`, `scripts/mac-build.sh` | 📝 | `bash -n` and shellcheck (warning level) clean in WSL; never run on macOS |
 
 ## iOS: app source (Apple frameworks)
 
