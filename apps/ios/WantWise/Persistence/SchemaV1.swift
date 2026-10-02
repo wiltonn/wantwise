@@ -184,7 +184,8 @@ extension WantWiseSchemaV1 {
         var lastSyncedAt: Date?
         var want: WantEntity?
 
-        init(_ decision: WantDecision, want: WantEntity?) {
+        /// Insert into a context before setting `want` (some iOS 17 builds mishandle relationships on un-inserted models).
+        init(_ decision: WantDecision) {
             id = decision.id
             wantId = decision.wantId
             kindRaw = decision.kind.rawValue
@@ -192,7 +193,6 @@ extension WantWiseSchemaV1 {
             previousRevisitAt = decision.previousRevisitAt
             newRevisitAt = decision.newRevisitAt
             decidedAt = decision.decidedAt
-            self.want = want
         }
 
         var snapshot: WantDecision {

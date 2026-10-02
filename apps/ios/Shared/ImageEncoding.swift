@@ -69,7 +69,7 @@ enum ImageEncoding {
             throw EncodingError.unreadable
         }
         let output = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil) else {
+        guard let destination = CGImageDestinationCreateWithData(output as CFMutableData, UTType.jpeg.identifier as CFString, 1, nil) else {
             throw EncodingError.encodeFailed
         }
         CGImageDestinationAddImage(destination, image, [kCGImageDestinationLossyCompressionQuality: jpegQuality] as CFDictionary)

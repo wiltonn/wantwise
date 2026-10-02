@@ -29,6 +29,7 @@ struct AddWantView: View {
     @State private var imageRemoved = false
     @State private var savedWant: Want?
     @State private var savedImageURL: URL?
+    @State private var defaultCurrency = "CAD"
     @State private var errorMessage: String?
     @FocusState private var focus: Field?
 
@@ -237,7 +238,7 @@ struct AddWantView: View {
 
     private var currentCurrency: String {
         if case .edit(let entity) = mode { return entity.currency }
-        return store.defaultCurrency
+        return defaultCurrency
     }
 
     private func toggle(_ answer: SimilarItemAnswer) {
@@ -260,6 +261,8 @@ struct AddWantView: View {
     }
 
     private func loadForEditing() {
+        // Read once here rather than during body (it may create the child profile on first use).
+        defaultCurrency = store.defaultCurrency
         guard case .edit(let entity) = mode else { return }
         let want = entity.snapshot
         title = want.title

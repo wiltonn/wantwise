@@ -33,6 +33,8 @@ _Last updated: 2026-10-02 (before any Mac session)_
 
 All files pass `swiftc -parse` (syntax only) in WSL. Syntax-valid is **not** compiled: type errors, API mismatches and isolation errors are only found by Xcode.
 
+An independent pre-Mac review (2026-10-02) checked every file against iOS 17 APIs and the WantWiseCore API. It reproduced language and isolation questions with the Linux Swift compiler in Swift 5 mode. It found and we fixed 4 likely compile errors and 7 runtime/test issues: preview isolation, an inaccessible `PlannedReminder` init, a nested `#require`, a `CFMutableData` bridge, UI-test element queries, the notification cold-launch route, the double launch work, a write during render, the unit-test host store, and the relationship-before-insert order. That lowers the risk; it doesn't replace compiling.
+
 | Area | Files | Status |
 |---|---|---|
 | SwiftData schema V1 + container | `Persistence/*` | 📝 |

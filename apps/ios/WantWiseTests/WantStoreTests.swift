@@ -229,7 +229,8 @@ struct PersistenceTests {
         }
 
         let second = try StoreHarness.make(storeURL: storeURL, directory: directory)
-        let reopened = try #require(try second.store.want(id: #require(wantId)))
+        let id = try #require(wantId)
+        let reopened = try #require(try second.store.want(id: id))
         #expect(reopened.title == "Survives")
         #expect(reopened.decisionHistory.map(\.kind) == [.waitLonger])
         #expect(second.store.imageURL(for: reopened) != nil)

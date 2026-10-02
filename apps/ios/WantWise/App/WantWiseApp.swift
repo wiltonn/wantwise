@@ -20,6 +20,7 @@ struct WantWiseApp: App {
     }
 }
 
+@MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
@@ -53,7 +54,9 @@ final class AppEnvironment {
         var remindersEnabled = true
 
         #if DEBUG
-        inMemory = arguments.contains("-WantWiseInMemory")
+        // Unit tests are hosted by the app: never touch the real on-disk store from a test run.
+        let isUnitTestHost = NSClassFromString("XCTestCase") != nil
+        inMemory = arguments.contains("-WantWiseInMemory") || isUnitTestHost
         remindersEnabled = !arguments.contains("-WantWiseNoReminders")
         if arguments.contains("-WantWiseResetData") { Persistence.destroyLocalData() }
         #endif

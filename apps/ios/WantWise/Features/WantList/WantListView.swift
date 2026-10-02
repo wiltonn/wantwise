@@ -88,7 +88,7 @@ struct WantListView: View {
         .sheet(isPresented: $showingAdd) { AddWantView() }
         .sheet(item: $finishing) { FinishAddingView(entity: $0) }
         .fullScreenCover(item: $reconsidering) { ReconsiderView(entity: $0) }
-        .onChange(of: router.reconsiderWantId) { _, id in
+        .onChange(of: router.reconsiderWantId, initial: true) { _, id in
             guard let id, let entity = byId[id] else { return }
             router.reconsiderWantId = nil
             if entity.snapshot.phase(now: store.displayNow) == .readyToReconsider { reconsidering = entity }

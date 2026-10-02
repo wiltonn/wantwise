@@ -108,7 +108,9 @@ extension WantStore {
             let newRevisit = kind == .waitLonger ? policy.revisitDate(afterDays: 4, from: at, calendar: calendar) : nil
             let outcome = try want.deciding(kind, newRevisitAt: newRevisit, now: at)
             want = outcome.want
-            context.insert(WantDecisionEntity(outcome.decision, want: entity))
+            let decisionEntity = WantDecisionEntity(outcome.decision)
+            context.insert(decisionEntity)
+            decisionEntity.want = entity
         }
         entity.apply(want)
         try context.save()

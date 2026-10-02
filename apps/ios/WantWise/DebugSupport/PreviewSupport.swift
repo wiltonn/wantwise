@@ -6,6 +6,7 @@ import WantWiseCore
 /// In-memory environments for SwiftUI previews (and anything else that needs a throwaway store).
 @MainActor
 enum PreviewSupport {
+    @MainActor
     struct Env {
         let container: ModelContainer
         let store: WantStore

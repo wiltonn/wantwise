@@ -37,11 +37,12 @@ struct WantDetailView: View {
         let want = entity.snapshot
         let now = store.displayNow
         let phase = want.phase(now: now)
+        let imageURL = store.imageURL(for: entity)
 
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                WantArtwork(imageURL: store.imageURL(for: entity), title: want.displayTitle, sourceType: want.sourceType, style: .poster, maxPixelSize: 1600)
-                    .frame(height: store.imageURL(for: entity) == nil ? 260 : 440)
+                WantArtwork(imageURL: imageURL, title: want.displayTitle, sourceType: want.sourceType, style: .poster, maxPixelSize: 1600)
+                    .frame(height: imageURL == nil ? 260 : 440)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.radiusLarge, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 8) {

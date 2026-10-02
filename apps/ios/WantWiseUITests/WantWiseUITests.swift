@@ -16,17 +16,17 @@ final class WantWiseUITests: XCTestCase {
     func testAddWantAppearsOnList() {
         let app = launch(["-WantWiseInMemory"])
         addWant(app, title: "UI test headphones", price: "49", reason: "Mine hurt my ears")
-        XCTAssertTrue(app.staticTexts["UI test headphones"].waitForExistence(timeout: 5))
+        XCTAssertTrue(wantCard(app, titled: "UI test headphones").waitForExistence(timeout: 5))
     }
 
     func testWantSurvivesRelaunch() {
         var app = launch(["-WantWiseResetData"])
         addWant(app, title: "Relaunch test", price: "12", reason: "Testing")
-        XCTAssertTrue(app.staticTexts["Relaunch test"].waitForExistence(timeout: 5))
+        XCTAssertTrue(wantCard(app, titled: "Relaunch test").waitForExistence(timeout: 5))
         app.terminate()
 
         app = launch()
-        XCTAssertTrue(app.staticTexts["Relaunch test"].waitForExistence(timeout: 5))
+        XCTAssertTrue(wantCard(app, titled: "Relaunch test").waitForExistence(timeout: 5))
     }
 
     func testReconsiderReadySampleWant() {
@@ -39,6 +39,11 @@ final class WantWiseUITests: XCTestCase {
         stillWant.tap()
         XCTAssertTrue(app.buttons["doneAfterDecision"].waitForExistence(timeout: 5))
         app.buttons["doneAfterDecision"].tap()
+    }
+
+    /// Grid cards combine their children into one accessibility element, so match on the label.
+    private func wantCard(_ app: XCUIApplication, titled title: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", title)).firstMatch
     }
 
     private func addWant(_ app: XCUIApplication, title: String, price: String, reason: String) {
@@ -55,7 +60,8 @@ final class WantWiseUITests: XCTestCase {
         priceField.tap()
         priceField.typeText(price)
 
-        let reasonField = app.textFields["reasonField"]
+        // A vertical-axis TextField is exposed as a text view.
+        let reasonField = app.descendants(matching: .any)["reasonField"]
         reasonField.tap()
         reasonField.typeText(reason)
 

@@ -29,8 +29,6 @@ final class WantStore {
 
     /// "Now" for countdowns on screen. Refreshed when the app becomes active and once a minute while visible.
     private(set) var displayNow: Date
-    /// Last problem worth telling the user about (shown as an alert by RootView).
-    var lastErrorMessage: String?
 
     @ObservationIgnored private var ticker: Task<Void, Never>?
     @ObservationIgnored private var reminderSync: Task<Void, Never>?
@@ -200,8 +198,9 @@ final class WantStore {
         let newRevisit = wait.map(revisitDate(for:))
         let outcome = try entity.snapshot.deciding(kind, note: note, newRevisitAt: newRevisit, now: clock())
         entity.apply(outcome.want)
-        let decision = WantDecisionEntity(outcome.decision, want: entity)
+        let decision = WantDecisionEntity(outcome.decision)
         context.insert(decision)
+        decision.want = entity
         try context.save()
         if kind != .waitLonger { reminders.clearDelivered(for: entity.id) }
         syncReminders()

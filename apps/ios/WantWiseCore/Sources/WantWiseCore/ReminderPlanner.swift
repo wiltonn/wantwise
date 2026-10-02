@@ -7,6 +7,14 @@ public struct PlannedReminder: Equatable, Sendable, Identifiable {
     public var fireAt: Date
     public var title: String
     public var body: String
+
+    public init(id: String, wantId: UUID, fireAt: Date, title: String, body: String) {
+        self.id = id
+        self.wantId = wantId
+        self.fireAt = fireAt
+        self.title = title
+        self.body = body
+    }
 }
 
 /// A notification already pending in the system, as far as reconciliation needs to know.

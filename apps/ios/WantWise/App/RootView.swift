@@ -24,14 +24,14 @@ struct RootView: View {
             .tabItem { Label("Decided", systemImage: "checkmark.seal") }
             .tag(AppTab.decided)
         }
-        .onChange(of: scenePhase) { _, phase in
+        // `initial: true` covers launch; no separate .task needed.
+        .onChange(of: scenePhase, initial: true) { _, phase in
             switch phase {
             case .active: store.appBecameActive()
             case .background: store.appWentToBackground()
             default: break
             }
         }
-        .task { store.appBecameActive() }
     }
 }
 
