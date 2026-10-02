@@ -43,8 +43,8 @@ record() { echo "- $1" >> "$SUMMARY"; }
 collect_errors() {
   [ -f "$1" ] || return
   {
-    grep -E "(error|fatal error):" "$1" | sed -E "s#$IOS_DIR/##g" | sort -u | head -80
-    grep -E "✘|Test Case .* failed|XCTAssert.*failed|failed - " "$1" | sed -E "s#$IOS_DIR/##g" | sort -u | head -40
+    grep -E "(error|fatal error):" "$1" | sed -E "s#(/Volumes/[^/]+)?$IOS_DIR/##g" | sort -u | head -80
+    grep -E "✘|Test Case .* failed|XCTAssert.*failed|failed - " "$1" | sed -E "s#(/Volumes/[^/]+)?$IOS_DIR/##g" | sort -u | head -40
   } >> "$LOGS/errors.txt"
 }
 fail() {
@@ -106,6 +106,9 @@ NAME="${PRIMARY%%|*}"; UDID="${PRIMARY##*|}"
 echo "Using: $NAME ($UDID)"
 record "Simulator: $NAME"
 DEST="platform=iOS Simulator,id=$UDID"
+# Booting first starts CoreSimulator; on a fresh login xcodebuild otherwise lists no Simulator destinations.
+xcrun simctl boot "$UDID" 2>/dev/null || true
+xcrun simctl bootstatus "$UDID" -b >/dev/null 2>&1 || true
 
 # ---------------------------------------------------------------- build
 xc() { xcodebuild -project WantWise.xcodeproj -scheme WantWise -destination "$DEST" -derivedDataPath "$DERIVED" $EXTRA_FLAGS "$@"; }

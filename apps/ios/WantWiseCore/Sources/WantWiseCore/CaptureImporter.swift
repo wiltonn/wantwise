@@ -14,6 +14,8 @@ public enum CaptureImporter {
         public var skippedExisting: [UUID] = []
         public var failed: [UUID] = []
         public var unreadable: Int = 0
+
+        public init() {}
     }
 
     public static func importAll(
