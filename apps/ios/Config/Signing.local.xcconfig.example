@@ -1,0 +1,11 @@
+// Copy to Signing.local.xcconfig (git-ignored) on the Mac that signs device/TestFlight builds.
+// Not needed for Simulator builds.
+//
+//   cp Config/Signing.local.xcconfig.example Config/Signing.local.xcconfig
+
+// Apple Developer Team ID (developer.apple.com → Membership details). Never commit this.
+WANTWISE_TEAM_ID = ABCDE12345
+
+// Only if the agreed identifiers differ from the placeholders in Base.xcconfig:
+// WANTWISE_BUNDLE_PREFIX = tech.wantwise
+// WANTWISE_APP_GROUP = group.tech.wantwise.app

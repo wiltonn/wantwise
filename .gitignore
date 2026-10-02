@@ -32,3 +32,10 @@ supabase/.temp/
 # Editors
 .vscode/
 .idea/
+
+# Team-specific signing (never commit)
+apps/ios/Config/Signing.local.xcconfig
+
+# iOS build output
+apps/ios/build/
+apps/ios/build-logs/

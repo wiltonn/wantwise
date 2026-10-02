@@ -1,0 +1,134 @@
+# XcodeGen spec — the source of truth for the Xcode project (DECISIONS.md D-003).
+# Generate on a Mac:   cd apps/ios && xcodegen generate
+# WantWise.xcodeproj is git-ignored. Never edit project settings in Xcode; change this file or Config/*.xcconfig.
+#
+# Signing: Simulator builds need no Apple team (D-026). Device builds read WANTWISE_TEAM_ID from the
+# git-ignored Config/Signing.local.xcconfig (see docs/APPLE_HANDOFF.md).
+
+name: WantWise
+
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+  groupSortPosition: top
+
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+
+packages:
+  WantWiseCore:
+    path: WantWiseCore
+
+settingGroups:
+  # Applied at target level so it wins over XcodeGen's preset CODE_SIGN_IDENTITY.
+  signing:
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: Apple Development
+    DEVELOPMENT_TEAM: $(WANTWISE_TEAM_ID)
+    "CODE_SIGN_STYLE[sdk=iphonesimulator*]": Manual
+    "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": "-"
+    "DEVELOPMENT_TEAM[sdk=iphonesimulator*]": ""
+    "PROVISIONING_PROFILE_SPECIFIER[sdk=iphonesimulator*]": ""
+  iphoneOnly:
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+
+targets:
+  WantWise:
+    type: application
+    platform: iOS
+    sources:
+      - path: WantWise
+      - path: Shared
+    dependencies:
+      - package: WantWiseCore
+      - target: WantWiseShare
+    settings:
+      groups: [signing, iphoneOnly]
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(WANTWISE_APP_BUNDLE_ID)
+        INFOPLIST_FILE: Config/WantWise-Info.plist
+        CODE_SIGN_ENTITLEMENTS: Config/WantWise.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+      configs:
+        Release:
+          # Sample screenshots for the DEBUG sample-data loader never ship (D-027).
+          EXCLUDED_SOURCE_FILE_NAMES: "debug-sample-*"
+
+  WantWiseShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: WantWiseShare
+      - path: Shared
+    dependencies:
+      - package: WantWiseCore
+    settings:
+      groups: [signing, iphoneOnly]
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(WANTWISE_SHARE_BUNDLE_ID)
+        INFOPLIST_FILE: Config/WantWiseShare-Info.plist
+        CODE_SIGN_ENTITLEMENTS: Config/WantWiseShare.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+
+  WantWiseTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: WantWiseTests
+    dependencies:
+      - target: WantWise
+      # Module visibility only: the app (the test host) already links WantWiseCore; linking it twice would
+      # give the test bundle its own copy of the domain types.
+      - package: WantWiseCore
+        link: false
+    settings:
+      groups: [iphoneOnly]
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: $(WANTWISE_APP_BUNDLE_ID).tests
+        CODE_SIGNING_ALLOWED: NO
+
+  WantWiseUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: WantWiseUITests
+    dependencies:
+      - target: WantWise
+    settings:
+      groups: [iphoneOnly]
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: $(WANTWISE_APP_BUNDLE_ID).uitests
+        CODE_SIGNING_ALLOWED: NO
+        TEST_TARGET_NAME: WantWise
+
+schemes:
+  WantWise:
+    build:
+      targets:
+        WantWise: all
+        WantWiseTests: [test]
+        WantWiseUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - name: WantWiseTests
+        - name: WantWiseUITests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

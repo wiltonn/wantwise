@@ -1,0 +1,26 @@
+// Shared build settings for every target. Committed; contains nothing team-specific.
+//
+// Identifiers are PLACEHOLDERS until confirmed against the signing partner's Apple account (D-022).
+// Override any of the WANTWISE_* values in the git-ignored Signing.local.xcconfig.
+
+WANTWISE_BUNDLE_PREFIX = tech.wantwise
+WANTWISE_APP_BUNDLE_ID = $(WANTWISE_BUNDLE_PREFIX).app
+WANTWISE_SHARE_BUNDLE_ID = $(WANTWISE_APP_BUNDLE_ID).share
+WANTWISE_APP_GROUP = group.$(WANTWISE_APP_BUNDLE_ID)
+// Empty means "no team": fine for Simulator builds (D-026). Set in Signing.local.xcconfig for device builds.
+WANTWISE_TEAM_ID =
+
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+SDKROOT = iphoneos
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+// Swift 5 language mode for app targets keeps the first Mac session focused on real errors rather than
+// strict-concurrency diagnostics in not-yet-compiled code (D-025). WantWiseCore already builds in Swift 6 mode.
+SWIFT_VERSION = 5.0
+SWIFT_STRICT_CONCURRENCY = minimal
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+LOCALIZATION_PREFERS_STRING_CATALOGS = YES
+
+// Optional, git-ignored, last so it can override anything above.
+#include? "Signing.local.xcconfig"
