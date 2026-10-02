@@ -57,3 +57,13 @@ public enum LovedThingKind: String, Codable, Sendable, CaseIterable {
     case person
     case activity
 }
+
+extension SourceType {
+    /// Best guess for an image chosen from the photo library, from its pixel size alone (no Photos permission needed).
+    /// Phone screenshots are tall portrait images (≈ 2.17:1 on modern iPhones); camera photos are 4:3 or 16:9.
+    public static func inferredForLibraryImage(width: Int, height: Int) -> SourceType {
+        guard width > 0, height > 0 else { return .photo }
+        let ratio = Double(height) / Double(width)
+        return ratio >= 1.85 ? .screenshot : .photo
+    }
+}

@@ -318,3 +318,18 @@ private extension Want {
         return want
     }
 }
+
+@Suite("Source type inference")
+struct SourceTypeInferenceTests {
+    @Test(arguments: [
+        (1170, 2532, SourceType.screenshot), // iPhone 13–15 screenshot
+        (1290, 2796, .screenshot),            // Pro Max
+        (750, 1334, .photo),                  // iPhone SE screenshot (16:9) — indistinguishable from a photo; acceptable
+        (4032, 3024, .photo),                 // landscape photo
+        (3024, 4032, .photo),                 // portrait photo
+        (0, 0, .photo),
+    ])
+    func infers(width: Int, height: Int, expected: SourceType) {
+        #expect(SourceType.inferredForLibraryImage(width: width, height: height) == expected)
+    }
+}
