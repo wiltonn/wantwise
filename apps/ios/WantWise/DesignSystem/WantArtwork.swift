@@ -61,6 +61,7 @@ struct WantArtwork: View {
             }
         }
         .clipped()
+        .contentShape(Rectangle())
         .task(id: imageURL) {
             guard let imageURL else { image = nil; return }
             if let hit = ImageCache.shared.cached(imageURL, maxPixelSize: maxPixelSize) {
@@ -74,12 +75,17 @@ struct WantArtwork: View {
 
     private func poster(_ image: UIImage) -> some View {
         ZStack {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .blur(radius: 40)
-                .saturation(1.2)
-                .overlay(Color.black.opacity(0.45))
+            // The fill layer sits in an overlay so it can't size the ZStack: a scaledToFill child would grow the
+            // artwork past the frame its parent gives it, covering (and taking taps from) the content below.
+            Color.clear.overlay {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .blur(radius: 40)
+                    .saturation(1.2)
+                    .overlay(Color.black.opacity(0.45))
+            }
+            .clipped()
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
