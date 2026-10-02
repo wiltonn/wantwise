@@ -38,7 +38,7 @@ In Milestone 1 a single Family and ChildProfile are created on first launch. No 
 | id | UUID | |
 | familyId | UUID | |
 | displayName | String | First name only |
-| defaultCurrency | String | e.g. `"CAD"` / `"USD"` |
+| defaultCurrency | String | `"CAD"` by default (D-020). Seeds new Wants only. |
 | createdAt / updatedAt | Date | |
 
 ### Want
@@ -53,12 +53,13 @@ In Milestone 1 a single Family and ChildProfile are created on first launch. No 
 | imageFilename | String? | | File in the app's images directory; later the Storage object path |
 | sourceType | SourceType | ✓ | |
 | priceMinor | Int? | | Cents |
-| currency | String | ✓ | Defaults to child's currency |
+| currency | String | ✓ | Always stored per Want; seeded from child's `defaultCurrency` |
 | reason | String? | | "What makes you want this?" |
 | similarItemAnswer | SimilarItemAnswer? | | see below |
 | similarItemNote | String? | | Optional free text ("my old earbuds") |
 | status | WantStatus | ✓ | |
 | revisitAt | Date? | | Required once status is `waiting` |
+| waitStartedAt | Date? | | Start of the current waiting period; resets on "Wait longer". Drives progress bars (added 2026-10-02). |
 | decidedAt | Date? | | Set when a terminal-ish decision is made |
 | decisionReason | String? | | Latest decision's note (full history in WantDecision) |
 | isVisibleOnDisplay | Bool | ✓ | Default `true`; child/parent can hide individual Wants |

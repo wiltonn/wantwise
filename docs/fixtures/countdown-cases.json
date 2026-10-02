@@ -1,0 +1,20 @@
+{
+  "_comment": "Shared countdown/ago test cases. Run by WantWiseCore (Swift) and apps/display (Vitest) so both platforms agree. Times are instants; timeZone is the viewer's local zone.",
+  "countdown": [
+    { "name": "several days left", "timeZone": "America/Toronto", "now": "2026-10-02T14:00:00-04:00", "revisitAt": "2026-10-09T16:00:00-04:00", "expected": { "kind": "days", "days": 7, "text": "7 days left" } },
+    { "name": "tomorrow, late evening", "timeZone": "America/Toronto", "now": "2026-10-02T23:30:00-04:00", "revisitAt": "2026-10-03T16:00:00-04:00", "expected": { "kind": "tomorrow", "text": "Reconsider tomorrow" } },
+    { "name": "today, morning", "timeZone": "America/Toronto", "now": "2026-10-09T08:00:00-04:00", "revisitAt": "2026-10-09T16:00:00-04:00", "expected": { "kind": "today", "text": "Reconsider today" } },
+    { "name": "exactly at revisit", "timeZone": "America/Toronto", "now": "2026-10-09T16:00:00-04:00", "revisitAt": "2026-10-09T16:00:00-04:00", "expected": { "kind": "ready", "text": "Ready to think again" } },
+    { "name": "past revisit", "timeZone": "America/Toronto", "now": "2026-10-12T09:00:00-04:00", "revisitAt": "2026-10-09T16:00:00-04:00", "expected": { "kind": "ready", "text": "Ready to think again" } },
+    { "name": "across DST end (Nov 1 2026)", "timeZone": "America/Toronto", "now": "2026-10-31T20:00:00-04:00", "revisitAt": "2026-11-02T16:00:00-05:00", "expected": { "kind": "days", "days": 2, "text": "2 days left" } },
+    { "name": "across DST start (Mar 8 2026)", "timeZone": "America/Toronto", "now": "2026-03-07T22:00:00-05:00", "revisitAt": "2026-03-09T16:00:00-04:00", "expected": { "kind": "days", "days": 2, "text": "2 days left" } },
+    { "name": "same day in Toronto", "timeZone": "America/Toronto", "now": "2026-10-02T09:00:00-04:00", "revisitAt": "2026-10-02T16:00:00-04:00", "expected": { "kind": "today", "text": "Reconsider today" } },
+    { "name": "same instants are tomorrow in Tokyo", "timeZone": "Asia/Tokyo", "now": "2026-10-02T09:00:00-04:00", "revisitAt": "2026-10-02T16:00:00-04:00", "expected": { "kind": "tomorrow", "text": "Reconsider tomorrow" } },
+    { "name": "thirty days", "timeZone": "America/Vancouver", "now": "2026-10-02T12:00:00-07:00", "revisitAt": "2026-11-01T16:00:00-08:00", "expected": { "kind": "days", "days": 30, "text": "30 days left" } }
+  ],
+  "ago": [
+    { "name": "same day", "timeZone": "America/Toronto", "createdAt": "2026-10-02T08:00:00-04:00", "now": "2026-10-02T21:00:00-04:00", "expected": "earlier today" },
+    { "name": "yesterday, under 24h", "timeZone": "America/Toronto", "createdAt": "2026-10-01T22:00:00-04:00", "now": "2026-10-02T07:00:00-04:00", "expected": "yesterday" },
+    { "name": "a week", "timeZone": "America/Toronto", "createdAt": "2026-10-02T08:00:00-04:00", "now": "2026-10-09T16:00:00-04:00", "expected": "7 days ago" }
+  ]
+}
