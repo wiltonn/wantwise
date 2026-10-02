@@ -18,14 +18,15 @@ Shared data (Milestone 3+) lives in Supabase.
 ```
 wantwise/
 ├── apps/
-│   ├── ios/                 # SwiftUI app, Share Extension, pure-Swift core package
-│   │   ├── project.yml      # XcodeGen spec → generates WantWise.xcodeproj on the Mac
+│   ├── ios/                 # SwiftUI app, Share Extension, pure-Swift core package (see apps/ios/README.md)
+│   │   ├── project.yml      # XcodeGen spec → generates WantWise.xcodeproj
 │   │   ├── WantWiseCore/    # Swift package: domain logic, no Apple-only frameworks
 │   │   ├── WantWise/        # App target sources
 │   │   ├── WantWiseShare/   # Share Extension sources
-│   │   └── Config/          # Info.plists, entitlements, xcconfig
+│   │   ├── Config/          # Info.plists, entitlements, xcconfig (no Team ID)
+│   │   └── scripts/         # mac-build.sh
 │   └── display/             # Next.js household display
-├── supabase/                # migrations, RLS policies, seed (Milestone 3)
+├── supabase/                # migrations, RLS policies, seed (Milestone 3; not created yet)
 └── docs/
 ```
 
@@ -40,6 +41,7 @@ wantwise/
 - [DEVELOPMENT.md](docs/DEVELOPMENT.md) — WSL vs. Mac workflow, Cloud Mac checklist, testing
 - [DECISIONS.md](docs/DECISIONS.md) — dated decision log (append-only)
 - [VERIFICATION.md](docs/VERIFICATION.md) — what has actually been tested, and where
+- [CLOUD_MAC_SESSION.md](docs/CLOUD_MAC_SESSION.md) — rented-Mac runbook: clone → Simulator build → Milestone 1 check
 - [APPLE_HANDOFF.md](docs/APPLE_HANDOFF.md) — instructions for the signing/TestFlight partner
 
 ## Development model

@@ -1,44 +1,83 @@
 # Verification status
 
-What has actually been tested, and where. Update this file when something is verified on a new platform. Never mark something verified because it "should work".
+What has actually been tested, and where. Update this file whenever something is verified on a new platform. Never mark something verified because it "should work".
 
-Legend:
-- ✅ **Verified in WSL**: built and tests run in WSL (Ubuntu 24.04)
-- 📝 **Written in WSL, needs Mac/Xcode**: source exists; not yet compiled against Apple SDKs
-- 🍎 **[MAC REQUIRED]**: can only be done on macOS/Xcode or a device
-- ⏳ **Not started**
+| Label | Meaning |
+|---|---|
+| ✅ **TESTED IN WSL** | Built and tests run in WSL (Ubuntu 24.04, Swift 6.4, Node 22) |
+| 📝 **SOURCE AUTHORED — MAC VALIDATION REQUIRED** | Source exists; never compiled against Apple SDKs, never run |
+| 🍎 **MAC/XCODE VERIFIED** | Built/run with Xcode on macOS (record Xcode + iOS runtime versions) |
+| ⏳ Not started | |
 
-_Last updated: 2026-10-02_
+_Last updated: 2026-10-02 (before any Mac session)_
 
-## iOS
+## iOS: domain (WantWiseCore)
 
-| Item | Status | Evidence / notes |
+| Item | Status | Evidence |
 |---|---|---|
-| `WantWiseCore` builds (Swift 6.4, Linux) | ✅ | `swift build`, zero warnings |
-| `WantWiseCore` tests: 40 tests, 8 suites | ✅ | `swift test`: transitions, decision history, revisit dates (incl. DST), countdown (shared fixture), money parsing, sections, metrics, capture inbox format |
-| `WantWiseCore` builds/tests on macOS / iOS SDK | 🍎 | Expected to pass (Foundation only), but not yet run. Swift Testing requires Xcode 16+. |
-| `project.yml`, Info.plists, entitlements, xcconfig | ⏳ | Next step |
-| SwiftData models, `WantStore`, notifications | ⏳ | |
-| Milestone 1 SwiftUI views | ⏳ | |
-| Xcode project generation (XcodeGen) | 🍎 | |
-| Simulator run, persistence across relaunch | 🍎 | |
-| Signing, App Group registration, TestFlight | 🍎 | Signing partner; see APPLE_HANDOFF.md |
-| Share Extension | ⏳ (Milestone 2) | |
+| Builds, zero warnings (Swift 6 language mode) | ✅ | `swift build` on Linux |
+| 66 tests in 15 suites | ✅ | `swift test`: transitions, decision history, revisit dates (DST), countdown (shared fixture), money, sections, metrics, edits/soft delete, wait choices, reminder planning + diff, image file store, capture inbox + importer (incl. failure rollback), decision wording, screenshot inference |
+| Same tests on macOS | 📝 | Expected to pass (Foundation only) |
+
+## iOS: project definition
+
+| Item | Status | Evidence |
+|---|---|---|
+| `project.yml` generates an Xcode project | ✅ | XcodeGen 2.46.0 built from source on Linux; `xcodegen generate` succeeds. Inspected pbxproj: per-target bundle IDs/entitlements/plists, SDK-conditional signing, embedded extension, local package linked into app + extension only, test hosts, Release exclusion of `debug-sample-*` |
+| Info.plists and entitlements are valid plists | ✅ | Python `plistlib` |
+| Asset catalog JSON valid; icon 1024², RGB (no alpha) | ✅ | `json.tool`, Pillow |
+| Xcode opens/builds the generated project | 📝 | |
+| Simulator build with no team (D-026) | 📝 | Fallback documented: `CODE_SIGNING_ALLOWED=NO` |
+
+## iOS: app source (Apple frameworks)
+
+All files pass `swiftc -parse` (syntax only) in WSL. Syntax-valid is **not** compiled: type errors, API mismatches and isolation errors are only found by Xcode.
+
+| Area | Files | Status |
+|---|---|---|
+| SwiftData schema V1 + container | `Persistence/*` | 📝 |
+| WantStore (single write path) | `Store/WantStore.swift` | 📝 |
+| Image encoding (ImageIO) + image cache | `Shared/ImageEncoding.swift`, `DesignSystem/WantArtwork.swift` | 📝 |
+| Local reminders + tap routing | `Notifications/*` | 📝 |
+| Screens: list, add/edit, finish adding, detail, reconsider, decided | `Features/**` | 📝 |
+| Root, tabs, app environment, launch arguments | `App/*` | 📝 |
+| DEBUG sample data, previews, debug menu | `DebugSupport/*` | 📝 |
+| Share Extension skeleton | `WantWiseShare/*` | 📝 |
+| Unit tests (WantStore, SwiftData, images, reminders, relaunch, import) | `WantWiseTests/*` | 📝 written, never run |
+| UI tests (add, relaunch, reconsider) | `WantWiseUITests/*` | 📝 written, never run |
+| SwiftUI previews | in each view file | 📝 |
+
+## iOS: behaviour (Milestone 1 loop, CLOUD_MAC_SESSION.md §7)
+
+| Step | Status |
+|---|---|
+| Launch, empty state | 📝 |
+| Add Want (name, price, why, similar, wait) | 📝 |
+| Appears on list; survives relaunch | 📝 |
+| Picture from Photos becomes the primary image | 📝 |
+| Detail shows time remaining | 📝 |
+| Reconsider: still want / wait longer / don't need it | 📝 |
+| Reminder delivered; tap opens Want | 📝 |
+| Layout on iPhone SE / standard / Pro Max | 📝 |
+| Share Extension: Photos → Share → WantWise | 📝 (optional in first session) |
+| Device install / TestFlight | ⏳ Stage 3 |
 
 ## Display
 
-| Item | Status | Evidence / notes |
+| Item | Status | Evidence |
 |---|---|---|
-| Unit tests (Vitest): 21 tests | ✅ | Shared countdown fixture, revisit dates across DST, ordering, price formatting, privacy filter |
-| TypeScript typecheck | ✅ | `npm run typecheck` |
-| Production build (Next.js 16.3) | ✅ | `npm run build` |
-| Renders at 1920×1080, 3840×2160, 1366×768 | ✅ | Headless Chrome (Windows) screenshots in `docs/display-screens/` |
-| Rotation, cross-fade, polling, wake lock, drift, 6 h reload | 📝 | Implemented; checked by eye in the browser, no automated test |
-| Readability from ~3 m on the real monitor/TV | ⏳ | Needs a person standing back from the screen |
-| Supabase data source | ⏳ (Milestone 4) | |
+| Unit tests (Vitest): 21 | ✅ | Shared countdown fixture, DST revisit dates, ordering, price formatting, privacy filter |
+| Typecheck, production build (Next.js 16.3) | ✅ | |
+| Renders at 1920×1080, 3840×2160, 1366×768 | ✅ | Headless Chrome screenshots in `docs/display-screens/` |
+| Rotation, cross-fade, polling, wake lock, drift, 6 h reload | 📝 | Implemented; checked by eye only |
+| Readability from ~3 m on the real screen | ⏳ | |
 
 ## Shared contract
 
 | Item | Status |
 |---|---|
-| `docs/fixtures/countdown-cases.json` passes in Swift **and** TypeScript | ✅ |
+| `docs/fixtures/countdown-cases.json` passes in Swift and TypeScript | ✅ |
+
+## Mac session log
+
+_(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what was verified, what was fixed.)_

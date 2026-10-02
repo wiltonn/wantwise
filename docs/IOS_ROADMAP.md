@@ -30,14 +30,16 @@ Legend: **[WSL]** can be authored/checked in WSL · **[MAC REQUIRED]** needs Xco
 
 **Done when**: the child can add and reconsider Wants on their own phone, and data survives relaunch and app updates.
 
+**Status (2026-10-02):** 1.1–1.5 authored in WSL. WantWiseCore verified on Linux; the Xcode project generates in WSL; all app Swift passes a syntax-only parse. 1.6 is now split into **Stage 2** (rented Mac, Simulator only: [CLOUD_MAC_SESSION.md](CLOUD_MAC_SESSION.md)) and **Stage 3** (signing partner, TestFlight: [APPLE_HANDOFF.md](APPLE_HANDOFF.md)). See [VERIFICATION.md](VERIFICATION.md).
+
 ## Milestone 2 — Screenshot & Share capture
 
 **Goal**: Screenshot → Share → WantWise in under 10 seconds. Plus photo capture.
 
 | Step | Work | Where |
 |---|---|---|
-| 2.1 | `CapturedWant` (Codable inbox format), inbox import logic, text→URL extraction, title fallback — with tests | [WSL] |
-| 2.2 | `WantWiseShare` target in `project.yml`, activation rules, entitlements | [WSL] |
+| 2.1 | `CapturedWant` (Codable inbox format), inbox import logic, text→URL extraction, title fallback — with tests | [WSL]: done except text→URL extraction |
+| 2.2 | `WantWiseShare` target in `project.yml`, activation rules, entitlements | [WSL]: done (skeleton, D-030) |
 | 2.3 | Extension: item loading, ImageIO downsampling, "Want this?" SwiftUI UI, atomic inbox write, best-effort notification | [WSL] authored, [MAC REQUIRED] compiled |
 | 2.4 | App: import inbox on foreground, `ImageStore`, images on cards/detail, PhotosPicker + camera, `LPMetadataProvider` for shared URLs, "Finish thinking about this" flow for `captured` | [WSL] authored, [MAC REQUIRED] compiled |
 | 2.5 | Device testing: Photos app, screenshot markup, Safari (incl. Full Page PDF), Amazon app, YouTube, a game | [MAC REQUIRED] build → TestFlight → iPhone |

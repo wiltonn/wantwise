@@ -30,7 +30,7 @@ The iPhone is the **source of truth** in Milestones 1–2 and remains fully func
 | Target | Contents |
 |---|---|
 | `WantWiseCore` (local Swift package) | Domain value types, enums, status transitions, revisit/countdown calculations, metrics, `CapturedWant` inbox format, inbox import logic (against a file-system protocol). **Imports Foundation only** — no SwiftUI, SwiftData, UIKit. Builds and tests on Linux. |
-| `WantWise` (app) | SwiftUI views, SwiftData `@Model` classes, `WantStore`, image storage, notifications, inbox importer wiring. |
+| `WantWise` (app) | SwiftUI views, SwiftData `@Model` classes (versioned schema, D-024), `WantStore`, ImageIO encoding, notifications, inbox import wiring. |
 | `WantWiseShare` (Share Extension) | Capture UI hosted in `UIHostingController`; writes to inbox. Depends on `WantWiseCore` only. |
 | `WantWiseTests` | App-level tests: SwiftData persistence, image handling. |
 | `WantWiseUITests` | A few smoke UI tests for the Milestone 1 loop. |
@@ -78,7 +78,7 @@ Local only. One pending request per waiting Want, identifier = `want-<uuid>`, fi
 
 ### Minimum iOS version
 
-**iOS 18.0, provisional** (D-021). No iOS-18-only API is used in Milestones 1–2, so iOS 17 is possible with only an extra Simulator test pass. Decided from the child's phone before the first Xcode build.
+**iOS 17.0** (D-028). iOS-18-only APIs are avoided unless that decision is revisited.
 
 ## Display
 

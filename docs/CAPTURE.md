@@ -61,7 +61,7 @@ The child should pin WantWise to the front of the share sheet's app row once (Sh
 | Safari's screenshot UI can produce a **"Full Page" PDF** instead of an image. | V1: accept images and URLs; treat PDF as a stretch (render page 1 to an image). [MAC REQUIRED to verify behaviour] |
 | Item providers are async (`NSItemProvider.loadFileRepresentation` / `loadItem`). Shared items may arrive as file URLs, `Data`, or `UIImage`, depending on the host app. | Handle `public.image` via file representation first, fall back to data. |
 | Network fetching (link previews) from an extension is allowed but slow and may be cut short. | Don't fetch URL metadata in the extension. The app fetches `LPMetadataProvider` previews later, on import. |
-| Local notifications: scheduling via `UNUserNotificationCenter` from an extension is expected to work if the app already has permission. [MAC REQUIRED to verify] | The app also **reconciles** all pending notifications on every launch, so a reminder exists even if the extension couldn't schedule one. |
+| Local notifications: scheduling via `UNUserNotificationCenter` from an extension is expected to work if the app already has permission. [MAC REQUIRED to verify] | The V1 extension does **not** schedule (D-030). The app **reconciles** all reminders when it next comes to the foreground and imports the inbox. Revisit if children capture without opening the app for days. |
 | Extension UI is a `UIViewController`; SwiftUI is hosted via `UIHostingController`. | Shared SwiftUI components (image preview, wait-duration picker) live in a small shared source group used by both targets. |
 
 ### Decision: the extension writes to an App Group **inbox**, the app imports

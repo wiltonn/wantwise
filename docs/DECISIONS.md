@@ -51,7 +51,7 @@ Device-generated UUIDs are primary keys everywhere. Wants use LWW on device `upd
 ### D-014 — iPhone delivery via TestFlight · 2026-10-02 · Accepted (account ownership superseded by D-018)
 A rented cloud Mac can't be cabled to the child's iPhone, and free signing expires in 7 days. Paid Developer Program + TestFlight is the delivery path. GitHub Actions macOS CI for builds is a later option to reduce Mac rentals.
 
-### D-015 — Deployment target iOS 18 · 2026-10-02 · Accepted (provisional; see D-021)
+### D-015 — Deployment target iOS 18 · 2026-10-02 · Superseded by D-028
 SwiftData matured in iOS 18. Lower only if the child's phone can't run it.
 
 ### D-016 — No AI, local notifications only, in V1 · 2026-10-02 · Accepted
@@ -76,7 +76,7 @@ Amends D-009/CAPTURE.md. The SwiftData store and `Images/` live in the **app's o
 ### D-020 — Default currency CAD, always explicit on each Want · 2026-10-02 · Accepted
 `ChildProfile.defaultCurrency = "CAD"` seeds new Wants. Every Want stores its own `currency`. Nothing formats or sums money without the currency code; metrics group totals by currency.
 
-### D-021 — Deployment target: iOS 18 provisionally; iOS 17 is feasible · 2026-10-02 · Open (decide before first Xcode build)
+### D-021 — Deployment target: iOS 18 provisionally; iOS 17 is feasible · 2026-10-02 · Superseded by D-028
 Milestone 1–2 code depends on **no iOS-18-only API**. iOS-18-only features we deliberately avoid: SwiftData `#Index`/`#Unique` macros, SwiftData History API, custom data stores, `@Previewable`, `MeshGradient`. iOS 18's benefit is SwiftData stability fixes (predicate and relationship bugs in 17.0–17.x), and we already reduce that risk by storing enums as raw strings and keeping relationships simple. Supporting iOS 17 would mean a Simulator test pass on an iOS 17 runtime and nothing else. **Decide based on the child's iPhone iOS version.** Not changed automatically.
 
 ### D-022 — Proposed identifier namespace `tech.wantwise` · 2026-10-02 · Open (confirm with the friend's account before first signed build)
@@ -84,3 +84,29 @@ Placeholders: app `tech.wantwise.app`, share extension `tech.wantwise.app.share`
 
 ### D-023 — Display uses a fixed 1920×1080 stage, scaled to fit · 2026-10-02 · Accepted
 Rather than reflowing the layout per screen size, the Display is composed once at 1920×1080 and scaled uniformly (`transform: scale`), with the scale set before first paint. A household screen is viewed from a distance as one composition; this keeps the design identical on 1080p, 4K and laptop screens and keeps the CSS simple. Revisit if a portrait or very different aspect-ratio screen becomes a target.
+
+### D-024 — SwiftData schema is versioned from V1 and carries sync fields · 2026-10-02 · Accepted
+Models live inside `WantWiseSchemaV1: VersionedSchema` with an (empty) `SchemaMigrationPlan`, every stored property has a default, enums are raw strings, and `needsUpload`/`lastSyncedAt` are present now. A V2 then adds a migration stage instead of retrofitting versioning, and Milestone 3 sync needs no schema change. Domain logic stays in WantWiseCore value types; the only mapping is `WantEntity.snapshot` / `apply(_:)`, needed because WantWiseCore must stay Foundation-only.
+
+### D-025 — App targets use Swift 5 language mode (for now) · 2026-10-02 · Accepted
+`SWIFT_VERSION = 5.0`, `SWIFT_STRICT_CONCURRENCY = minimal` for the app, extension and test targets, so the first paid Mac session fixes real errors rather than strict-concurrency diagnostics in code that has never been compiled. WantWiseCore already builds cleanly in Swift 6 mode. Revisit (move to Swift 6) after Milestone 1 is verified.
+
+### D-026 — Simulator builds need no Apple team; Stage 2 is independent of Stage 3 · 2026-10-02 · Accepted
+Signing settings are SDK-conditional: Simulator builds use manual "sign to run locally" (`CODE_SIGN_IDENTITY = -`, no team); device builds use automatic signing with `WANTWISE_TEAM_ID` from the git-ignored `Signing.local.xcconfig`. Anyone can clone, generate and run in the Simulator; only device/TestFlight builds involve the signing partner. Fallback if a Simulator build still demands a team: `CODE_SIGNING_ALLOWED=NO` on the command line.
+
+### D-027 — Sample data is DEBUG-only and its images never ship · 2026-10-02 · Accepted
+`SampleData`, `PreviewSupport` and `DebugMenu` are wrapped in `#if DEBUG`. Sample images are named `debug-sample-*` and excluded from Release builds via `EXCLUDED_SOURCE_FILE_NAMES` (project.yml). Loaded with `-WantWiseSampleData` or the DEBUG ladybug menu.
+
+### D-028 — Deployment target iOS 17.0 · 2026-10-02 · Accepted
+Supersedes D-015/D-021. Nothing in Milestones 1–2 needs iOS 18, and iOS 17 widens device compatibility. Avoid iOS-18-only APIs (SwiftData `#Index`/`#Unique`, History API, `@Previewable`, `MeshGradient`, `onScrollGeometryChange`, `Tab` builder syntax) unless this decision is revisited. Simulator testing should include an iOS 17 runtime when one is available.
+
+### D-029 — Milestone 1 app structure and UX choices · 2026-10-02 · Accepted
+- Two tabs: **Thinking** (ready → finish adding → thinking-about grid) and **Decided** (decided Wants + decision timeline). No separate settings screen yet.
+- Dark appearance only (`UIUserInterfaceStyle = Dark`), matching the Display's visual identity. Revisit if it proves a problem.
+- One family and one child profile are created automatically on first launch (child display name "Me" until a name UI exists; only the Display uses it).
+- Reconsider choices are styled with equal weight; decision wording comes from WantWiseCore's `DecisionCopy`. The child's Decided tab shows counts and average thinking time but no money totals (parent view later).
+- Images picked from Photos are classified `screenshot` vs `photo` by aspect ratio (no Photos permission needed), which tells the Display how to crop.
+- Notification permission is requested in context (first waiting Want), not at launch. Reminder syncs are serialized and read fresh data, so a late sync can't resurrect a removed reminder.
+
+### D-030 — Share Extension skeleton ships in the Milestone 1 project · 2026-10-02 · Accepted
+The `WantWiseShare` target (image/URL/text → "Want this?" → App Group inbox) is included so Milestone 2 starts from a compiled, embedded extension. It doesn't schedule notifications itself; the app imports the inbox and reconciles reminders on its next foreground. The main app works fully if the App Group is unavailable (e.g. unsigned builds).
