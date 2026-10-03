@@ -106,3 +106,12 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
 - **Built:** commit 1426dea (fixes drafted in WSL) compiled without changes. `mac-build.sh uitest`: WantWiseCore 66/66, unit 20/20, UI 4/4 on iPhone 16 / iOS 18.5. `screens` green on SE / 16 / 16 Pro Max.
 - **SE home:** *Add a Want* bar no longer overlays tappable content. A throwaway XCUITest swiped up, checked the *Think about it* and *Add* frames no longer overlap, and tapped through to the decision screen. New `docs/ios-screens/small-home.png` (at rest, the first card's button is still under the bar; scrolling is needed, as intended).
 - **Share Extension:** Photos → Share → WantWise via a throwaway XCUITest. The nav title is white and the placeholders are readable (`docs/ios-screens/share-extension.png`). Save/import wasn't re-run this time (verified in the previous session; the change only touches appearance).
+
+### 2026-10-02 — MacinCloud, Follow-up 3 (same machine and versions)
+
+- **Release build (D-027):** `xcodebuild -configuration Release -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build` succeeded. Its only Swift warning is an expected "will never be executed" at `WantWiseApp.swift:66`, because `inMemory` is always false outside DEBUG.
+- **Bundle:** `WantWise.app` has no `debug-sample-*` files. `Assets.car` holds only AccentColor, AppIcon and LaunchBackground (`xcrun assetutil --info`).
+- **Binary:** `strings` finds no `WantWiseSampleData`, `WantWiseResetData`, `WantWiseInMemory`, `WantWiseNoReminders` or `DebugMenu` in the app or extension binary. As a control, the same search finds them in the Debug `WantWise.debug.dylib`.
+- **Privacy manifest:** `PrivacyInfo.xcprivacy` is present in the app and in `PlugIns/WantWiseShare.appex`.
+- **Simulator:** installed on iPhone 16 / iOS 18.5 and launched with `-WantWiseSampleData`. The flag was ignored (empty state, no sample Wants) and there's no ladybug menu.
+- **Not covered:** a signed archive (Stage 3).

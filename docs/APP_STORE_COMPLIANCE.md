@@ -16,7 +16,7 @@ Status key: ✅ satisfied in the repo · 🍎 confirmed in a Mac/Xcode build · 
 | Export compliance | `ITSAppUsesNonExemptEncryption = NO` in the app's Info.plist | ✅ `Config/WantWise-Info.plist` |
 | Permission strings | A purpose string for every permission the app requests. PhotosPicker needs none; notifications need none. Camera, full photo-library access, contacts, location etc. would | ✅ none required today |
 | Permission timing | Ask in context, not at launch (Guideline 5.1.1) | ✅ notifications asked at the first waiting Want (D-029) |
-| Debug code | Sample data, debug menu and sample images are DEBUG-only and excluded from Release | ✅ D-027; ⚠️ confirm in the archived build (no ladybug) |
+| Debug code | Sample data, debug menu and sample images are DEBUG-only and excluded from Release | ✅ D-027; 🍎 Xcode 26.3, unsigned Release Simulator build: no `debug-sample-*` files or assets, no debug launch-argument strings in the binary, no ladybug menu. ⚠️ re-check the signed archive at Stage 3 |
 | Completeness (2.1) | No crashes, no placeholder text, every visible button works | ⚠️ run the Milestone 1 checks (CLOUD_MAC_SESSION.md §6) on the build you upload |
 | Notifications (4.5.4) | Reminders only, no marketing | ✅ |
 | App icon | 1024×1024 App Store icon, no transparency | ✅ asset catalog icon is 1024², RGB, no alpha (VERIFICATION.md) |
