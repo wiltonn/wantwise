@@ -142,6 +142,37 @@ struct CapturedWantTests {
         #expect(want.details == text)
     }
 
+    @Test func linkInSharedTextBecomesProductURL() throws {
+        let text = "Look at this https://www.lego.com/en-ca/product/x it's cool"
+        let want = try CapturedWant(sourceType: .sharedText, sharedText: text, createdAt: .now)
+            .makeWant(childId: TestSupport.childId, defaultCurrency: "CAD")
+        #expect(want.productURL == "https://www.lego.com/en-ca/product/x")
+        #expect(want.details == text)
+        #expect(want.title == text)
+    }
+
+    @Test func explicitProductURLWinsOverTextLink() throws {
+        let capture = CapturedWant(
+            sourceType: .sharedText,
+            productURL: "https://example.com/explicit",
+            sharedText: "see https://other.example.com/x",
+            createdAt: .now
+        )
+        #expect(capture.draft.productURL == "https://example.com/explicit")
+    }
+
+    @Test func textThatIsOnlyALinkShowsTheHost() throws {
+        let want = try CapturedWant(sourceType: .sharedText, sharedText: "https://www.lego.com/en-ca/product/x\n", createdAt: .now)
+            .makeWant(childId: TestSupport.childId, defaultCurrency: "CAD")
+        #expect(want.title == "")
+        #expect(want.displayTitle == "lego.com")
+        #expect(want.productURL == "https://www.lego.com/en-ca/product/x")
+    }
+
+    @Test func textWithoutLinkHasNoProductURL() throws {
+        #expect(CapturedWant(sourceType: .sharedText, sharedText: "A blue bike", createdAt: .now).draft.productURL == nil)
+    }
+
     @Test func roundTripsThroughJSON() throws {
         let capture = CapturedWant(
             sourceType: .screenshot,
@@ -160,5 +191,46 @@ struct CapturedWantTests {
         let want = TestSupport.waitingWant()
         let data = try WantWiseJSON.encoder().encode(want)
         #expect(try WantWiseJSON.decoder().decode(Want.self, from: data) == want)
+    }
+}
+
+@Suite("Links in shared text")
+struct LinkExtractionTests {
+    private func link(_ text: String) -> String? { LinkExtraction.firstWebLink(in: text)?.absoluteString }
+
+    @Test func midSentence() {
+        #expect(link("I want this https://example.com/toy?id=3 so much") == "https://example.com/toy?id=3")
+    }
+
+    @Test func trailingPunctuationIsTrimmed() {
+        #expect(link("Here: https://example.com/a.") == "https://example.com/a")
+        #expect(link("(see https://example.com/b)") == "https://example.com/b")
+        #expect(link("https://example.com/c, and more") == "https://example.com/c")
+        #expect(link("Wow https://example.com/d!?") == "https://example.com/d")
+    }
+
+    @Test func parenthesesThatBelongToTheLinkAreKept() {
+        #expect(link("https://en.wikipedia.org/wiki/Lego_(company).") == "https://en.wikipedia.org/wiki/Lego_(company)")
+    }
+
+    @Test func linkGluedToPrecedingText() {
+        #expect(link("link:https://example.com/e") == "https://example.com/e")
+    }
+
+    @Test func firstOfSeveralWins() {
+        #expect(link("http://first.example.com then https://second.example.com") == "http://first.example.com")
+        #expect(link("line one\nHTTPS://Upper.example.com/x\nhttps://b.example.com") == "HTTPS://Upper.example.com/x")
+    }
+
+    @Test func noLink() {
+        #expect(link("Just words, no link.") == nil)
+        #expect(link("") == nil)
+        #expect(link("https://") == nil)
+        #expect(link("example.com without a scheme") == nil)
+    }
+
+    @Test func nonWebSchemesAreIgnored() {
+        #expect(link("mailto:me@example.com ftp://files.example.com tel:123 javascript:alert(1)") == nil)
+        #expect(link("ftp://files.example.com then https://ok.example.com") == "https://ok.example.com")
     }
 }

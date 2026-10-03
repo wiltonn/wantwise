@@ -44,11 +44,15 @@ public struct CapturedWant: Codable, Sendable, Equatable, Identifiable {
         self.createdAt = createdAt
     }
 
+    /// Shared text: the first line becomes the title and the first web link the `productURL` (an explicit
+    /// `productURL` wins). A text that is only a link gets no title, so the Want shows the host until a preview arrives.
     public var draft: WantDraft {
-        WantDraft(
-            title: title.nilIfBlank ?? sharedText.flatMap(Self.firstLine) ?? "",
+        let textLink = sharedText.flatMap(LinkExtraction.firstWebLink(in:))
+        let textTitle = sharedText.flatMap(Self.firstLine).flatMap { $0 == textLink?.absoluteString ? nil : $0 }
+        return WantDraft(
+            title: title.nilIfBlank ?? textTitle ?? "",
             details: sharedText.nilIfBlank,
-            productURL: productURL.nilIfBlank,
+            productURL: productURL.nilIfBlank ?? textLink?.absoluteString,
             imageFilename: imageFilename,
             sourceType: sourceType,
             reason: reason,

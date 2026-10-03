@@ -101,7 +101,7 @@ The `CapturedWant` Codable type lives in `WantWiseCore` so both targets (and Lin
 
 ## Shared text
 
-Store as `details`, first line (truncated) as title. If the text contains a URL, extract it to `productURL` (`NSDataDetector`, no AI).
+Store as `details`, first line (truncated) as title. If the text contains an `http`/`https` link, the first one becomes `productURL` (`LinkExtraction` in WantWiseCore: whitespace token scan, trailing punctuation trimmed, `URL(string:)` + scheme check; no `NSDataDetector`, which Linux Foundation lacks, and no AI). An explicit `productURL` wins. A text that is only a link gets no title, so the Want shows the host until the link preview arrives.
 
 ## Photo (in app)
 
