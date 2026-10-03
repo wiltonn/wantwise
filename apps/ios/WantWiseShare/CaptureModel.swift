@@ -11,7 +11,8 @@ final class CaptureModel {
     enum Phase: Equatable {
         case loading
         case ready
-        case saved(revisitAt: Date)
+        /// `revisitAt` is nil when saved without a reason: the app imports it as "Finish adding" (D-032).
+        case saved(revisitAt: Date?)
         case failed(String)
     }
 
@@ -98,7 +99,7 @@ final class CaptureModel {
         )
         do {
             try CaptureInbox(appGroupContainer: container).write(capture, imageData: imageData)
-            phase = .saved(revisitAt: revisitAt)
+            phase = .saved(revisitAt: reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : revisitAt)
             Task {
                 try? await Task.sleep(nanoseconds: 1_400_000_000)
                 onFinish?()

@@ -119,12 +119,42 @@ struct CapturedWantTests {
     @Test func revisitThatPassedBeforeImportIsStillImported() throws {
         let capture = CapturedWant(
             sourceType: .screenshot,
+            reason: "My friend has one",
             imageFilename: "shot.jpg",
             revisitAt: TestSupport.date("2026-10-05T16:00:00-04:00"),
             createdAt: TestSupport.date("2026-10-02T14:00:00-04:00")
         )
         let want = try capture.makeWant(childId: TestSupport.childId, defaultCurrency: "CAD")
         #expect(want.phase(now: TestSupport.date("2026-10-06T09:00:00-04:00")) == .readyToReconsider)
+    }
+
+    @Test(arguments: [nil, "", "   ", " \n\t "] as [String?])
+    func captureWithoutReasonIsCapturedEvenWithAWaitChoice(reason: String?) throws {
+        let createdAt = TestSupport.date("2026-10-02T14:00:00-04:00")
+        let capture = CapturedWant(
+            sourceType: .screenshot,
+            reason: reason,
+            imageFilename: "shot.jpg",
+            revisitAt: TestSupport.date("2026-10-09T16:00:00-04:00"),
+            createdAt: createdAt
+        )
+        let want = try capture.makeWant(childId: TestSupport.childId, defaultCurrency: "CAD")
+        #expect(want.status == .captured)
+        #expect(want.revisitAt == nil)
+        #expect(want.waitStartedAt == nil)
+        #expect(want.reason == nil)
+        #expect(want.createdAt == createdAt)
+        #expect(want.phase(now: createdAt) == .needsReflection)
+    }
+
+    @Test func captureWithReasonWaitsUntilItsDate() throws {
+        let revisit = TestSupport.date("2026-10-09T16:00:00-04:00")
+        let want = try CapturedWant(sourceType: .sharedURL, reason: " So fast ", productURL: "https://example.com/x",
+                                    revisitAt: revisit, createdAt: TestSupport.date("2026-10-02T14:00:00-04:00"))
+            .makeWant(childId: TestSupport.childId, defaultCurrency: "CAD")
+        #expect(want.status == .waiting)
+        #expect(want.revisitAt == revisit)
+        #expect(want.reason == "So fast")
     }
 
     @Test func quickCaptureWithoutWaitIsCaptured() throws {

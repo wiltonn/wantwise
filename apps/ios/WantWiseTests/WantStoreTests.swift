@@ -260,6 +260,33 @@ struct CaptureImportTests {
         #expect(h.store.importCapturedWants(from: inbox).imported.isEmpty)
         #expect(try h.store.liveWants().count == 1)
     }
+
+    /// D-032: a share without a reason waits for the child in "Finish adding", with no reminder, until finished.
+    @Test func reasonlessShareNeedsFinishingBeforeItGetsAReminder() async throws {
+        let h = try StoreHarness.make()
+        let inbox = CaptureInbox(appGroupContainer: h.directory.appendingPathComponent("Group"))
+        let quick = CapturedWant(sourceType: .screenshot, reason: "  ", revisitAt: h.store.revisitDate(for: .days(7)), createdAt: h.clock.now)
+        let thought = CapturedWant(sourceType: .screenshot, reason: "It glows", revisitAt: h.store.revisitDate(for: .days(3)), createdAt: h.clock.now)
+        try inbox.write(quick, imageData: ImageEncoding.downsampledJPEG(makePNG(width: 300, height: 600)))
+        try inbox.write(thought, imageData: ImageEncoding.downsampledJPEG(makePNG(width: 300, height: 600)))
+
+        #expect(Set(h.store.importCapturedWants(from: inbox).imported) == [quick.id, thought.id])
+        try await h.settleReminders()
+
+        let sections = try h.store.sections()
+        #expect(sections.needsReflection.map(\.id) == [quick.id])
+        #expect(sections.waiting.map(\.id) == [thought.id])
+        let entity = try #require(try h.store.want(id: quick.id))
+        #expect(entity.snapshot.revisitAt == nil)
+        #expect(h.center.pending.keys.sorted() == [ReminderPlanner.identifier(for: thought.id)])
+
+        try h.store.finishReflection(entity, reason: "My friend has one", similarItemAnswer: nil, wait: .days(7))
+        try await h.settleReminders()
+        #expect(entity.snapshot.status == .waiting)
+        #expect(try h.store.sections().waiting.map(\.id).contains(quick.id))
+        #expect(h.center.pending[ReminderPlanner.identifier(for: quick.id)]?.fireAt == entity.revisitAt)
+        #expect(h.center.pending.count == 2)
+    }
 }
 
 @MainActor

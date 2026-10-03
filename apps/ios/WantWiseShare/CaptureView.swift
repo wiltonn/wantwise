@@ -96,7 +96,7 @@ struct CaptureView: View {
         }
     }
 
-    private func saved(_ revisitAt: Date) -> some View {
+    private func saved(_ revisitAt: Date?) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 44))
@@ -104,9 +104,15 @@ struct CaptureView: View {
             Text("Saved")
                 .font(.wwDisplay)
                 .foregroundStyle(Theme.text)
-            Text("Let's think about this again on \(revisitAt.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())).")
-                .font(.wwTitle2)
-                .foregroundStyle(Theme.textMuted)
+            Group {
+                if let revisitAt {
+                    Text("Let's think about this again on \(revisitAt.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())).")
+                } else {
+                    Text("Open WantWise to say why you want it.")
+                }
+            }
+            .font(.wwTitle2)
+            .foregroundStyle(Theme.textMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 40)

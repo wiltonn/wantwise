@@ -63,10 +63,14 @@ public struct CapturedWant: Codable, Sendable, Equatable, Identifiable {
     /// Builds the Want at import time. `createdAt` comes from the capture, not the import, so
     /// "You wanted this N days ago" stays truthful even if the app is opened days later.
     ///
+    /// Only a capture with a reason starts waiting (D-032): the reason is the reflection that makes the child pause.
+    /// Without one it imports as `captured` ("Finish adding") and its `revisitAt` is dropped, so it gets no reminder
+    /// until the child finishes it in the app.
+    ///
     /// A revisit date that passed before import is kept: the Want will simply show as ready to reconsider.
     public func makeWant(childId: UUID, defaultCurrency: String) throws -> Want {
         var draft = self.draft
-        let revisit = draft.revisitAt
+        let revisit = reason.nilIfBlank == nil ? nil : draft.revisitAt
         draft.revisitAt = nil
         var want = try draft.makeWant(id: id, childId: childId, defaultCurrency: defaultCurrency, now: createdAt)
         if let revisit {
