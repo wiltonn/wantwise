@@ -45,6 +45,9 @@ targets:
     sources:
       - path: WantWise
       - path: Shared
+      # Privacy manifest (D-031); listed explicitly so it is always copied as a resource.
+      - path: Config/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - package: WantWiseCore
       - target: WantWiseShare
@@ -68,6 +71,8 @@ targets:
     sources:
       - path: WantWiseShare
       - path: Shared
+      - path: Config/PrivacyInfo.xcprivacy
+        buildPhase: resources
     dependencies:
       - package: WantWiseCore
     settings:

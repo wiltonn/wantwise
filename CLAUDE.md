@@ -9,6 +9,7 @@ Private family app: native SwiftUI iPhone app (`apps/ios`) + Next.js household D
 - **The Xcode project is generated** from `apps/ios/project.yml` (XcodeGen). Never edit `WantWise.xcodeproj` or change settings in Xcode's UI; edit `project.yml` / `apps/ios/Config/*.xcconfig` and regenerate.
 - **No Team ID, certificates or signing identities in the repo.** Simulator builds are unsigned (D-026). Device/TestFlight signing is Stage 3 (`docs/APPLE_HANDOFF.md`) and out of scope on the rented Mac.
 - **Keep domain logic in `apps/ios/WantWiseCore`** (Foundation only; must still pass `swift test` on Linux). Don't import Apple-only frameworks there.
+- **App Store compliance:** keep `apps/ios/Config/PrivacyInfo.xcprivacy` true to the code (D-031) and update `docs/APP_STORE_COMPLIANCE.md` with any change to data, permissions, networking or dependencies. Run the `app-store-reviewer` agent before a TestFlight upload.
 - Commit messages end with the attribution lines the harness provides.
 
 ## Mac session protocol (rented Mac, Stage 2)

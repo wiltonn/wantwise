@@ -27,3 +27,7 @@ Finish with a report: versions, build result, test results, Simulator devices, a
 2. Share Extension: `overrideUserInterfaceStyle = .dark` so the nav title and placeholders aren't black on dark.
 
 Build with `mac-build.sh uitest` (fix compile errors minimally), then `mac-build.sh screens`, and look at `small-home.png`: *Think about it* must not be covered (scrolling to reach it is fine). Re-run the Share Extension flow and screenshot the capture screen to confirm the title and placeholders are readable; replace `docs/ios-screens/small-home.png` and `share-extension.png`. Update the two 📝 entries in docs/VERIFICATION.md to 🍎 only if they pass. Commit, push, and report.
+
+## Follow-up 2 (typed prompt: `Do Follow-up 2 in docs/MAC_KICKOFF.md.`)
+
+`git pull --rebase`. A privacy manifest was added in WSL (`apps/ios/Config/PrivacyInfo.xcprivacy`, D-031, wired into both targets in `project.yml`). Run `mac-build.sh test`, then confirm `find apps/ios/build/DerivedData/Build/Products -name PrivacyInfo.xcprivacy` lists one in `WantWise.app` and one in `WantWise.app/PlugIns/WantWiseShare.appex`. If both are there, change the 📝 part of the "Privacy manifest" row in docs/VERIFICATION.md to 🍎 with the Xcode version, and the matching 📝 note in docs/APP_STORE_COMPLIANCE.md. Then run the `app-store-reviewer` agent and include its report. Commit, push, and report.

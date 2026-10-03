@@ -110,3 +110,6 @@ Supersedes D-015/D-021. Nothing in Milestones 1–2 needs iOS 18, and iOS 17 wid
 
 ### D-030 — Share Extension skeleton ships in the Milestone 1 project · 2026-10-02 · Accepted
 The `WantWiseShare` target (image/URL/text → "Want this?" → App Group inbox) is included so Milestone 2 starts from a compiled, embedded extension. It doesn't schedule notifications itself; the app imports the inbox and reconciles reminders on its next foreground. The main app works fully if the App Group is unavailable (e.g. unsigned builds).
+
+### D-031 — Privacy manifest declares an on-device-only app · 2026-10-02 · Accepted
+`apps/ios/Config/PrivacyInfo.xcprivacy` is bundled into both the app and the Share Extension. It declares no tracking, no collected data (nothing leaves the device) and no required-reason APIs, which is true of the code today. Any change that adds `UserDefaults`/`@AppStorage`, file-timestamp, disk-space or uptime APIs, a third-party SDK, analytics/crash reporting, or network sync (Milestone 3) must update the manifest and `docs/APP_STORE_COMPLIANCE.md` in the same change. The intended route is TestFlight for the family (docs/APPLE_HANDOFF.md); public App Store/Kids Category requirements are tracked in the compliance checklist but not designed for yet.
