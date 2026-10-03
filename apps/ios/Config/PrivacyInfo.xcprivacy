@@ -2,7 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   Privacy manifest for the WantWise app and the WantWiseShare extension (both bundle this file; D-031).
-  Everything stays on the device: no tracking, nothing collected, no required-reason APIs.
+  Everything stays on the device: no tracking, nothing collected, no required-reason APIs. The app's only network
+  use is fetching a link preview from the site the child shared (LinkPresentation); nothing is sent to us.
   Update this file (and docs/APP_STORE_COMPLIANCE.md) before adding UserDefaults/@AppStorage, file timestamps,
   disk-space or uptime APIs, analytics, crash reporting, third-party SDKs, or sync (Milestone 3).
 -->

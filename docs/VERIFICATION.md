@@ -9,7 +9,7 @@ What has actually been tested, and where. Update this file whenever something is
 | 🍎 **MAC/XCODE VERIFIED** | Built/run with Xcode on macOS (record Xcode + iOS runtime versions) |
 | ⏳ Not started | |
 
-_Last updated: 2026-10-02 (first Mac session: MacinCloud, Xcode 26.3, iOS 18.5 / 18.6 / 26.3.1 Simulators)_
+_Last updated: 2026-10-02 (Mac Follow-up 4, Milestone 2 capture: MacinCloud, Xcode 26.3, iOS 18.5 / 26.3.1 Simulators)_
 
 ## iOS: domain (WantWiseCore)
 
@@ -18,6 +18,7 @@ _Last updated: 2026-10-02 (first Mac session: MacinCloud, Xcode 26.3, iOS 18.5 /
 | Builds, zero warnings (Swift 6 language mode) | ✅ | `swift build` on Linux |
 | 66 tests in 15 suites | ✅ | `swift test`: transitions, decision history, revisit dates (DST), countdown (shared fixture), money, sections, metrics, edits/soft delete, wait choices, reminder planning + diff, image file store, capture inbox + importer (incl. failure rollback), decision wording, screenshot inference |
 | Same tests on macOS | 🍎 | `swift test` on macOS 15.7.7 / Xcode 26.3: 66 tests in 15 suites pass |
+| Milestone 2: links in shared text (`LinkExtraction`, `CapturedWant.draft`) and link-preview rules (`LinkPreviewRules`) | 🍎 / 📝 | 🍎 `swift test` on macOS: 82 tests in 17 suites pass (16 new: mid-sentence, trailing `.` `)` `,` `!?`, link parentheses kept, several links, no link, non-http schemes, explicit `productURL` wins, link-only text; placeholder titles, preview applied only to placeholder title / missing image). No `NSDataDetector`; Foundation only. 📝 not yet run on Linux: run `swift test` in WSL |
 
 ## iOS: project definition
 
@@ -47,7 +48,9 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Root, tabs, app environment, launch arguments | `App/*` | 🍎 |
 | DEBUG sample data, previews, debug menu | `DebugSupport/*` | 🍎 sample data + "Make one ready" used by UI tests |
 | Share Extension skeleton | `WantWiseShare/*` | 🍎 compiles and embeds; behaviour: see below |
-| Unit tests (WantStore, SwiftData, images, reminders, relaunch, import) | `WantWiseTests/*` | 🍎 20 tests in 5 suites pass (iOS 18.5 and 26.3.1) |
+| Link previews on import | `LinkPreviews/LinkPreviewFetcher.swift`, `Store/WantStore.swift` | 🍎 compiled; 7 unit tests with a fake fetcher (host title replaced, typed title kept, image downsampled to 2048 px JPEG, shared-text link, Wants with a picture skipped, failure and timeout leave the Want unchanged). 🍎 real `LPMetadataProvider` fetch in the Simulator (see behaviour) |
+| Take photo (camera) | `Features/AddWant/CameraPicker.swift`, `AddWantView.swift`, `NSCameraUsageDescription` | 🍎 compiles; purpose string present in the built Info.plist; button correctly hidden in the Simulator (no camera). 📝 camera, permission prompt and saved photo need a physical iPhone |
+| Unit tests (WantStore, SwiftData, images, reminders, relaunch, import, link previews) | `WantWiseTests/*` | 🍎 27 tests in 6 suites pass (iOS 18.5 and 26.3.1) |
 | UI tests (add, relaunch, reconsider, full Milestone 1 loop) | `WantWiseUITests/*` | 🍎 4 tests pass (iOS 18.5 and 26.3.1) |
 | SwiftUI previews | in each view file | 🍎 compile (`ENABLE_PREVIEWS`); 📝 not opened in the canvas |
 
@@ -64,6 +67,10 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Reminder delivered; tap opens Want | 📝 needs a human in the Simulator (§6 check 11) |
 | Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. SE overlap fixed (Follow-up 1): *Add a Want* is a bottom bar (`safeAreaInset`), so card content scrolls clear of it; at rest the first card's *Think about it* sits under the (opaque) bar, and one swipe up exposes it and it taps through to the decision screen (throwaway XCUITest on iPhone SE / iOS 18.6) |
 | Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Nav title and placeholders now readable on dark (`overrideUserInterfaceStyle = .dark`, Follow-up 1; capture screen re-checked on iPhone 16 / iOS 18.5) |
+| Share Extension: Safari → Share → WantWise (URL) | 🍎 iOS 18.5 and 26.3.1, unsigned, throwaway XCUITest: capture screen shows the host (`www.apple.com`), *Add to WantWise* saves, the app imports it and the link preview replaces the title with the page title and adds the page image (`docs/ios-screens/share-url-capture.png`, `share-url-imported.png`). On iOS 26 Safari, Share is behind the ••• button |
+| Share Extension: Photos → Share (image), re-run | 🍎 iOS 18.5 and 26.3.1: saved and imported with the screenshot (`docs/ios-screens/share-image-imported.png`) |
+| Link preview, before/after | 🍎 iPhone 16 / iOS 18.5: a `sharedURL` capture written into the App Group inbox (`https://www.apple.com/airpods-pro/`, title `www.apple.com`) imports with the host title and placeholder art, then within seconds shows "AirPods Pro 3" with the page image (stored as a 1024×537 JPEG in `Images/`). `docs/ios-screens/link-preview-before.png`, `link-preview-after.png` |
+| Link inside shared text | 🍎 unit tests only (core + app import). 📝 not shared from a real app (e.g. Notes) in the Simulator |
 | Device install / TestFlight | ⏳ Stage 3 |
 
 ## Display
@@ -115,3 +122,13 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
 - **Privacy manifest:** `PrivacyInfo.xcprivacy` is present in the app and in `PlugIns/WantWiseShare.appex`.
 - **Simulator:** installed on iPhone 16 / iOS 18.5 and launched with `-WantWiseSampleData`. The flag was ignored (empty state, no sample Wants) and there's no ladybug menu.
 - **Not covered:** a signed archive (Stage 3).
+
+### 2026-10-02 — MacinCloud, Follow-up 4: Milestone 2 capture (same machine and versions)
+
+- **Built:** links in shared text (6a59762), link previews on import (2c1dc48), Take photo (7a2534e). No schema change, no inbox format change.
+- **Tests:** WantWiseCore 82/82 (macOS; Linux run still to do), unit 27/27, UI 4/4. `mac-build.sh uitest` green on iPhone 16 / iOS 18.5; `xcodebuild test` green on iPhone 17 / iOS 26.3.1.
+- **Simulator:** real link preview fetch verified twice: an inbox capture written by hand, and a real Safari → Share → WantWise share on both runtimes. Image share from Photos re-run on both runtimes. Throwaway XCUITests were not committed.
+- **Link previews:** one attempt per import. If it fails (offline, timeout, the site blocks it), the Want keeps its host title and placeholder art and isn't retried on later launches; the child can still add a picture by editing. No ATS exception, so plain-`http` links are fetched only as far as ATS allows (not tested).
+- **Captured vs waiting (Follow-up 4's open question):** the extension always has a wait choice selected and always writes `revisitAt`, so every share imported as `waiting`, never `captured`. Nate since decided D-032 (no reason → *Finish adding*); that is Follow-up 5, not done here.
+- **Compliance review** (app-store-reviewer, run as a general-purpose agent with its instructions because the agent type wasn't loaded): no blockers. It flagged an untested claim about `http` previews (reworded) and a misleading Milestone 3 line (fixed). Recommendation: mention link-preview traffic in the TestFlight review notes.
+- **Still 📝:** camera (physical iPhone), Linux `swift test` for the new core code, shared text from a real app, `http` link previews under ATS.

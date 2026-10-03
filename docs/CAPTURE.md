@@ -43,7 +43,7 @@ No OCR, vision, or AI in V1. The screenshot itself *is* the record — the child
   "Saved. Let's think about this again on Fri, Oct 9."  (auto-dismiss ~1.5s)
 ```
 
-Target: **under 10 seconds** from share sheet to done. Only the image is required. Price and "do you have something similar?" are *not* asked in the extension — they can be added later in the app. If the child taps Add without a reason or wait choice, the Want is saved as `captured` and the app shows it as "Finish thinking about this".
+Target: **under 10 seconds** from share sheet to done. Only the image is required. Price and "do you have something similar?" are *not* asked in the extension — they can be added later in the app. If the child taps Add without a reason or wait choice, the Want is saved as `captured` and the app shows it as "Finish thinking about this". _As built (Milestone 2): the extension always has a wait choice selected and always writes `revisitAt`, so every share imports as `waiting`. D-032 changes this (no reason → `captured`); see Mac Follow-up 5._
 
 The child should pin WantWise to the front of the share sheet's app row once (Share → More → Edit → favourite). We'll note this in onboarding.
 

@@ -38,11 +38,11 @@ Legend: **[WSL]** can be authored/checked in WSL · **[MAC REQUIRED]** needs Xco
 
 | Step | Work | Where |
 |---|---|---|
-| 2.1 | `CapturedWant` (Codable inbox format), inbox import logic, text→URL extraction, title fallback — with tests | [WSL]: done except text→URL extraction |
-| 2.2 | `WantWiseShare` target in `project.yml`, activation rules, entitlements | [WSL]: done (skeleton, D-030) |
-| 2.3 | Extension: item loading, ImageIO downsampling, "Want this?" SwiftUI UI, atomic inbox write, best-effort notification | [WSL] authored, [MAC REQUIRED] compiled |
-| 2.4 | App: import inbox on foreground, `ImageStore`, images on cards/detail, PhotosPicker + camera, `LPMetadataProvider` for shared URLs, "Finish thinking about this" flow for `captured` | [WSL] authored, [MAC REQUIRED] compiled |
-| 2.5 | Device testing: Photos app, screenshot markup, Safari (incl. Full Page PDF), Amazon app, YouTube, a game | [MAC REQUIRED] build → TestFlight → iPhone |
+| 2.1 | `CapturedWant` (Codable inbox format), inbox import logic, text→URL extraction, title fallback — with tests | Done (text→URL extraction added on the Mac, Follow-up 4; Linux `swift test` still to run) |
+| 2.2 | `WantWiseShare` target in `project.yml`, activation rules, entitlements | Done; 🍎 builds and embeds |
+| 2.3 | Extension: item loading, ImageIO downsampling, "Want this?" SwiftUI UI, atomic inbox write, best-effort notification | 🍎 image and URL shares verified in the Simulator (iOS 18.5, 26.3.1). The extension doesn't schedule reminders (D-030). Reason-less shares → *Finish adding* (D-032): Follow-up 5 |
+| 2.4 | App: import inbox on foreground, `ImageStore`, images on cards/detail, PhotosPicker + camera, `LPMetadataProvider` for shared URLs, "Finish thinking about this" flow for `captured` | 🍎 import, images, link previews (real fetch in the Simulator). Camera built, 📝 needs a physical iPhone. Finish adding: 📝 not driven by a UI test |
+| 2.5 | Device testing: Photos app, screenshot markup, Safari (incl. Full Page PDF), Amazon app, YouTube, a game | ⏳ Stage 3 (TestFlight → iPhone). Not built yet: Safari Full Page PDF, JavaScript preprocessing, share-sheet pinning onboarding |
 
 **Done when**: the child habitually captures Wants via screenshots, and those Wants show their screenshots in the app.
 
