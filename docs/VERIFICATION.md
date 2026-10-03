@@ -61,8 +61,8 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Detail shows time remaining | 📝 detail opened only for a decided Want |
 | Reconsider: still want / wait longer / don't need it | 🍎 wait longer → still want via UI test, with history on detail + Timeline surviving relaunch; "don't need it" unit-tested only |
 | Reminder delivered; tap opens Want | 📝 needs a human in the Simulator (§6 check 11) |
-| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. Known issue: on the SE the floating *Add a Want* button covered the ready card's *Think about it*. 📝 Fix drafted in WSL (button moved to a bottom bar via `safeAreaInset`), needs a Mac build + `screens` |
-| Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Cosmetic: the extension's nav title was black on the dark background. 📝 Fix drafted in WSL (`overrideUserInterfaceStyle = .dark`), needs a Mac check |
+| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. SE overlap fixed (Follow-up 1): *Add a Want* is a bottom bar (`safeAreaInset`), so card content scrolls clear of it; at rest the first card's *Think about it* sits under the bar, and one swipe up exposes it and it taps through to the decision screen (throwaway XCUITest on iPhone SE / iOS 18.6) |
+| Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Nav title and placeholders now readable on dark (`overrideUserInterfaceStyle = .dark`, Follow-up 1; capture screen re-checked on iPhone 16 / iOS 18.5) |
 | Device install / TestFlight | ⏳ Stage 3 |
 
 ## Display
@@ -98,4 +98,10 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
 - **Added:** `testMilestone1AcceptanceLoop` (§6 checks 4, 6, 8, 9, 10 automated).
 - **Share Extension:** works end to end in the Simulator without signing (see table). Not a blocker; real-device App Group needs signing (Stage 3).
 - **Still 📝:** PhotosPicker, real notification delivery + tap, edit/finish-adding screens, Dynamic Type.
-- **Known layout issues (fixes drafted in WSL afterwards, 📝 until rebuilt on a Mac):** on the iPhone SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll; Share Extension nav title is invisible (black on dark).
+- **Known layout issues (fixed in Follow-up 1 below):** on the iPhone SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll; Share Extension nav title is invisible (black on dark).
+
+### 2026-10-02 — MacinCloud, Follow-up 1 (same machine and versions)
+
+- **Built:** commit 1426dea (fixes drafted in WSL) compiled without changes. `mac-build.sh uitest`: WantWiseCore 66/66, unit 20/20, UI 4/4 on iPhone 16 / iOS 18.5. `screens` green on SE / 16 / 16 Pro Max.
+- **SE home:** *Add a Want* bar no longer overlays tappable content. A throwaway XCUITest swiped up, checked the *Think about it* and *Add* frames no longer overlap, and tapped through to the decision screen. New `docs/ios-screens/small-home.png` (at rest, the first card's button is still under the bar; scrolling is needed, as intended).
+- **Share Extension:** Photos → Share → WantWise via a throwaway XCUITest. The nav title is white and the placeholders are readable (`docs/ios-screens/share-extension.png`). Save/import wasn't re-run this time (verified in the previous session; the change only touches appearance).
