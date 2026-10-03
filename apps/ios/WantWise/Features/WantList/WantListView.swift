@@ -77,12 +77,19 @@ struct WantListView: View {
             }
             .padding(.horizontal, Theme.pagePadding)
             .padding(.top, 8)
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
         .background(Theme.background.ignoresSafeArea())
-        .overlay(alignment: .bottom) {
-            if active > 0 { AddWantFloatingButton { showingAdd = true } }
+        // A bar of its own rather than an overlay: on small screens (iPhone SE) an overlaid button sat on top of the
+        // ready card's "Think about it", so the first tap went to Add instead. Content now scrolls clear of it.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if active > 0 {
+                AddWantFloatingButton { showingAdd = true }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
+                    .background(Theme.background.opacity(0.95))
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingAdd) { AddWantView() }

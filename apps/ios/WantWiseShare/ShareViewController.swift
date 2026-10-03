@@ -12,6 +12,9 @@ final class ShareViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // The app is dark-only via its Info.plist (D-029), but the extension inherits the host app's appearance;
+        // without this the navigation title and placeholders render for light mode (black on the dark background).
+        overrideUserInterfaceStyle = .dark
         view.backgroundColor = UIColor(Theme.background)
 
         model.onFinish = { [weak self] in

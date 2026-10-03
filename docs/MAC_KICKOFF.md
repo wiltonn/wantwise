@@ -16,3 +16,14 @@ Work autonomously:
 6. Only then, try the Share Extension (§7). Problems there must not block Milestone 1; document them.
 
 Finish with a report: versions, build result, test results, Simulator devices, acceptance result, Apple-specific bugs fixed, commits, verification status, Share Extension status, what still needs a human tapping in the Simulator, and what needs a physical iPhone.
+
+---
+
+## Follow-up 1 (typed prompt: `Do Follow-up 1 in docs/MAC_KICKOFF.md.`)
+
+`git pull --rebase`. Two fixes were drafted in WSL without a compiler (commit "fix(ios): keep Think about it clear of the Add button; dark Share Extension"):
+
+1. Home: the *Add a Want* button moved from an overlay to a bottom bar (`safeAreaInset`) so it can't cover the ready card's *Think about it* on the iPhone SE.
+2. Share Extension: `overrideUserInterfaceStyle = .dark` so the nav title and placeholders aren't black on dark.
+
+Build with `mac-build.sh uitest` (fix compile errors minimally), then `mac-build.sh screens`, and look at `small-home.png`: *Think about it* must not be covered (scrolling to reach it is fine). Re-run the Share Extension flow and screenshot the capture screen to confirm the title and placeholders are readable; replace `docs/ios-screens/small-home.png` and `share-extension.png`. Update the two 📝 entries in docs/VERIFICATION.md to 🍎 only if they pass. Commit, push, and report.

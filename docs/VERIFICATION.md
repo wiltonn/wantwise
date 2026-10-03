@@ -61,8 +61,8 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Detail shows time remaining | 📝 detail opened only for a decided Want |
 | Reconsider: still want / wait longer / don't need it | 🍎 wait longer → still want via UI test, with history on detail + Timeline surviving relaunch; "don't need it" unit-tested only |
 | Reminder delivered; tap opens Want | 📝 needs a human in the Simulator (§6 check 11) |
-| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. Known issue: on the SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll |
-| Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Cosmetic: the extension's nav title is black on the dark background |
+| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. Known issue: on the SE the floating *Add a Want* button covered the ready card's *Think about it*. 📝 Fix drafted in WSL (button moved to a bottom bar via `safeAreaInset`), needs a Mac build + `screens` |
+| Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Cosmetic: the extension's nav title was black on the dark background. 📝 Fix drafted in WSL (`overrideUserInterfaceStyle = .dark`), needs a Mac check |
 | Device install / TestFlight | ⏳ Stage 3 |
 
 ## Display
@@ -98,4 +98,4 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
 - **Added:** `testMilestone1AcceptanceLoop` (§6 checks 4, 6, 8, 9, 10 automated).
 - **Share Extension:** works end to end in the Simulator without signing (see table). Not a blocker; real-device App Group needs signing (Stage 3).
 - **Still 📝:** PhotosPicker, real notification delivery + tap, edit/finish-adding screens, Dynamic Type.
-- **Known layout issues (not fixed, design call):** on the iPhone SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll; Share Extension nav title is invisible (black on dark).
+- **Known layout issues (fixes drafted in WSL afterwards, 📝 until rebuilt on a Mac):** on the iPhone SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll; Share Extension nav title is invisible (black on dark).
