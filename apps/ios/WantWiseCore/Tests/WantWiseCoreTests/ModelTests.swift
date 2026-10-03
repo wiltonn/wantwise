@@ -234,3 +234,53 @@ struct LinkExtractionTests {
         #expect(link("ftp://files.example.com then https://ok.example.com") == "https://ok.example.com")
     }
 }
+
+@Suite("Link preview rules")
+struct LinkPreviewRuleTests {
+    private let now = TestSupport.date("2026-10-03T09:00:00-04:00")
+
+    private func shared(_ title: String = "", url: String? = "https://www.amazon.ca/dp/B0X", image: String? = nil,
+                        source: SourceType = .sharedURL) -> Want {
+        Want(childId: TestSupport.childId, title: title, productURL: url, imageFilename: image, sourceType: source,
+             currency: "CAD", status: .captured, createdAt: TestSupport.date("2026-10-02T14:00:00-04:00"))
+    }
+
+    @Test func onlySharedLinksWithoutImageWantAPreview() {
+        #expect(shared().wantsLinkPreview)
+        #expect(shared(source: .sharedText).wantsLinkPreview)
+        #expect(!shared(image: "x.jpg").wantsLinkPreview)
+        #expect(!shared(source: .manual).wantsLinkPreview)
+        #expect(!shared(url: nil).wantsLinkPreview)
+        #expect(!shared(url: "ftp://files.example.com/x").wantsLinkPreview)
+    }
+
+    @Test func placeholderTitles() {
+        #expect(shared("").hasPlaceholderTitle)
+        #expect(shared("amazon.ca").hasPlaceholderTitle)
+        #expect(shared("www.amazon.ca").hasPlaceholderTitle)
+        #expect(shared(" Amazon.ca ").hasPlaceholderTitle)
+        #expect(!shared("Red scooter").hasPlaceholderTitle)
+        #expect(!shared("lego.com").hasPlaceholderTitle)
+    }
+
+    @Test func pageTitleReplacesOnlyAPlaceholder() {
+        let fromHost = shared("amazon.ca").applyingLinkPreview(title: "Razor A5 Scooter", imageFilename: nil, now: now)
+        #expect(fromHost.title == "Razor A5 Scooter")
+        #expect(fromHost.updatedAt == now)
+
+        let typed = shared("My scooter").applyingLinkPreview(title: "Razor A5 Scooter", imageFilename: nil, now: now)
+        #expect(typed.title == "My scooter")
+        #expect(typed.updatedAt != now)
+    }
+
+    @Test func imageIsUsedOnlyWhenThereIsNone() {
+        #expect(shared().applyingLinkPreview(title: nil, imageFilename: "p.jpg", now: now).imageFilename == "p.jpg")
+        #expect(shared(image: "mine.jpg").applyingLinkPreview(title: nil, imageFilename: "p.jpg", now: now).imageFilename == "mine.jpg")
+    }
+
+    @Test func blankOrLongPageTitles() {
+        #expect(shared("").applyingLinkPreview(title: "  ", imageFilename: nil, now: now).title == "")
+        let long = String(repeating: "a", count: 200)
+        #expect(shared("").applyingLinkPreview(title: long, imageFilename: nil, now: now).title.count == 80)
+    }
+}

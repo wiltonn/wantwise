@@ -26,12 +26,15 @@ final class WantStore {
     let clock: () -> Date
     let calendar: Calendar
     let policy: RevisitPolicy
+    let linkPreviews: LinkPreviewFetching?
+    let linkPreviewTimeout: Duration
 
     /// "Now" for countdowns on screen. Refreshed when the app becomes active and once a minute while visible.
     private(set) var displayNow: Date
 
     @ObservationIgnored private var ticker: Task<Void, Never>?
     @ObservationIgnored private var reminderSync: Task<Void, Never>?
+    @ObservationIgnored private var previewTasks: [UUID: Task<Void, Never>] = [:]
 
     init(
         context: ModelContext,
@@ -39,7 +42,9 @@ final class WantStore {
         reminders: ReminderScheduling,
         clock: @escaping () -> Date = Date.init,
         calendar: Calendar = .current,
-        policy: RevisitPolicy = .standard
+        policy: RevisitPolicy = .standard,
+        linkPreviews: LinkPreviewFetching? = nil,
+        linkPreviewTimeout: Duration = .seconds(15)
     ) {
         self.context = context
         self.images = images
@@ -47,6 +52,8 @@ final class WantStore {
         self.clock = clock
         self.calendar = calendar
         self.policy = policy
+        self.linkPreviews = linkPreviews
+        self.linkPreviewTimeout = linkPreviewTimeout
         self.displayNow = clock()
     }
 
@@ -259,7 +266,75 @@ final class WantStore {
             }
         )
         if !report.imported.isEmpty { syncReminders() }
+        fetchLinkPreviews(for: report.imported)
         return report
+    }
+
+    // MARK: - Link previews (CAPTURE.md → Shared URL)
+
+    /// Best effort, once per import: for each Want that is a shared link with no picture, fetch the page's title and
+    /// image in the background. Never blocks import or the UI; a failure or timeout leaves the Want as it was.
+    /// Not retried on later launches (no schema change to remember attempts): the Want keeps its host title.
+    func fetchLinkPreviews(for ids: [UUID]) {
+        guard let linkPreviews else { return }
+        for id in ids where previewTasks[id] == nil {
+            guard let want = try? want(id: id)?.snapshot, want.wantsLinkPreview,
+                  let url = want.productURL.flatMap(URL.init(string:)) else { continue }
+            let images = images
+            let timeout = linkPreviewTimeout
+            previewTasks[id] = Task { [weak self] in
+                let preview = try? await Self.withTimeout(timeout) { try await linkPreviews.preview(for: url) }
+                // Downsample + write off the main actor; the same ImageFileStore path as every other picture.
+                var saved: String?
+                if let data = preview?.imageData {
+                    saved = try? await Task.detached(priority: .utility) { try images.save(data, for: id) }.value
+                }
+                guard let self else { return }
+                self.previewTasks[id] = nil
+                if let preview { self.applyLinkPreview(title: preview.title, imageFilename: saved, to: id) }
+            }
+        }
+    }
+
+    /// Waits for in-flight link previews (tests, debug tools).
+    func waitForLinkPreviews() async {
+        while let task = previewTasks.values.first {
+            await task.value
+        }
+    }
+
+    private func applyLinkPreview(title: String?, imageFilename: String?, to id: UUID) {
+        guard let entity = try? want(id: id) else {
+            if let imageFilename { try? images.delete(imageFilename) }
+            return
+        }
+        // Re-read: the child may have edited the Want or added a picture while the fetch ran.
+        let current = entity.snapshot
+        let updated = current.applyingLinkPreview(title: title, imageFilename: imageFilename, now: clock())
+        if let imageFilename, updated.imageFilename != imageFilename { try? images.delete(imageFilename) }
+        guard updated != current else { return }
+        do {
+            try write(entity) { _ in updated }
+        } catch {
+            context.rollback()
+            if let imageFilename { try? images.delete(imageFilename) }
+        }
+    }
+
+    private nonisolated static func withTimeout<T: Sendable>(
+        _ timeout: Duration,
+        _ operation: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await operation() }
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw URLError(.timedOut)
+            }
+            defer { group.cancelAll() }
+            guard let first = try await group.next() else { throw URLError(.timedOut) }
+            return first
+        }
     }
 
     // MARK: - Reminders

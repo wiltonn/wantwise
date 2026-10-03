@@ -261,3 +261,90 @@ struct CaptureImportTests {
         #expect(try h.store.liveWants().count == 1)
     }
 }
+
+@MainActor
+@Suite("Link previews on import")
+struct LinkPreviewImportTests {
+    private func importShared(_ h: StoreHarness, title: String? = nil, url: String = "https://www.amazon.ca/dp/B0X",
+                              source: SourceType = .sharedURL, text: String? = nil, image: Data? = nil) throws -> UUID {
+        let inbox = CaptureInbox(appGroupContainer: h.directory.appendingPathComponent("Group"))
+        let capture = CapturedWant(
+            sourceType: source,
+            title: title,
+            productURL: source == .sharedURL ? url : nil,
+            sharedText: text,
+            createdAt: h.clock.now
+        )
+        try inbox.write(capture, imageData: image)
+        #expect(h.store.importCapturedWants(from: inbox).imported == [capture.id])
+        return capture.id
+    }
+
+    @Test func hostTitleIsReplacedAndImageSavedDownsampled() async throws {
+        let fake = FakeLinkPreviews(.succeed(LinkPreview(title: "Razor A5 Scooter", imageData: makePNG(width: 3000, height: 1500))))
+        let h = try StoreHarness.make(linkPreviews: fake)
+        let id = try importShared(h, title: "www.amazon.ca")
+        await h.store.waitForLinkPreviews()
+
+        let entity = try #require(try h.store.want(id: id))
+        #expect(fake.requested.map(\.absoluteString) == ["https://www.amazon.ca/dp/B0X"])
+        #expect(entity.title == "Razor A5 Scooter")
+        let url = try #require(h.store.imageURL(for: entity))
+        let size = try #require(ImageEncoding.pixelSize(of: Data(contentsOf: url)))
+        #expect(max(size.width, size.height) == ImageEncoding.maxPixelSize)
+        #expect(url.pathExtension == "jpg")
+    }
+
+    @Test func typedTitleIsKept() async throws {
+        let h = try StoreHarness.make(linkPreviews: FakeLinkPreviews(.succeed(LinkPreview(title: "Razor A5 Scooter", imageData: nil))))
+        let id = try importShared(h, title: "Scooter for the park")
+        await h.store.waitForLinkPreviews()
+        #expect(try h.store.want(id: id)?.title == "Scooter for the park")
+    }
+
+    @Test func linkInSharedTextGetsAPreview() async throws {
+        let fake = FakeLinkPreviews(.succeed(LinkPreview(title: "LEGO Set", imageData: makePNG(width: 200, height: 200))))
+        let h = try StoreHarness.make(linkPreviews: fake)
+        let id = try importShared(h, source: .sharedText, text: "https://www.lego.com/en-ca/product/x")
+        await h.store.waitForLinkPreviews()
+        let entity = try #require(try h.store.want(id: id))
+        #expect(entity.title == "LEGO Set")
+        #expect(entity.imageFilename != nil)
+    }
+
+    @Test func wantsWithAPictureAreNotFetched() async throws {
+        let fake = FakeLinkPreviews(.succeed(LinkPreview(title: "Page", imageData: nil)))
+        let h = try StoreHarness.make(linkPreviews: fake)
+        _ = try importShared(h, image: ImageEncoding.downsampledJPEG(makePNG(width: 100, height: 100)))
+        await h.store.waitForLinkPreviews()
+        #expect(fake.requested.isEmpty)
+    }
+
+    @Test func failureLeavesTheWantUnchanged() async throws {
+        let h = try StoreHarness.make(linkPreviews: FakeLinkPreviews(.fail))
+        let id = try importShared(h)
+        let before = try #require(try h.store.want(id: id)).snapshot
+        await h.store.waitForLinkPreviews()
+        #expect(try h.store.want(id: id)?.snapshot == before)
+    }
+
+    @Test func timeoutLeavesTheWantUnchanged() async throws {
+        let h = try StoreHarness.make(linkPreviews: FakeLinkPreviews(.hang), linkPreviewTimeout: .milliseconds(200))
+        let id = try importShared(h)
+        let before = try #require(try h.store.want(id: id)).snapshot
+        let started = Date()
+        await h.store.waitForLinkPreviews()
+        #expect(Date().timeIntervalSince(started) < 10)
+        #expect(try h.store.want(id: id)?.snapshot == before)
+        #expect(h.store.images.orphans(referenced: []).isEmpty)
+    }
+
+    @Test func unreadableImageStillUpdatesTitle() async throws {
+        let h = try StoreHarness.make(linkPreviews: FakeLinkPreviews(.succeed(LinkPreview(title: "Page title", imageData: Data([1, 2, 3])))))
+        let id = try importShared(h)
+        await h.store.waitForLinkPreviews()
+        let entity = try #require(try h.store.want(id: id))
+        #expect(entity.title == "Page title")
+        #expect(entity.imageFilename == nil)
+    }
+}

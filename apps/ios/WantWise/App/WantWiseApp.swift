@@ -71,7 +71,12 @@ final class AppEnvironment {
 
         let images = ImageFileStore(directory: AppPaths.imagesDirectory, encode: ImageEncoding.downsampledJPEG)
         let reminders = ReminderScheduler(center: SystemNotificationCenter(), isEnabled: remindersEnabled)
-        store = WantStore(context: container.mainContext, images: images, reminders: reminders)
+        store = WantStore(
+            context: container.mainContext,
+            images: images,
+            reminders: reminders,
+            linkPreviews: LinkPresentationFetcher()
+        )
         router = AppRouter()
         notificationDelegate = NotificationDelegate(router: router)
 

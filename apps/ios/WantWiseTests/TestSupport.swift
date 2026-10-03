@@ -62,7 +62,8 @@ struct StoreHarness {
     }
 
     /// - Parameter storeURL: nil = in-memory; pass a file URL to test persistence across "relaunches".
-    static func make(storeURL: URL? = nil, directory: URL? = nil, now: Date = ISO8601DateFormatter().date(from: "2026-10-02T14:00:00-04:00")!) throws -> StoreHarness {
+    static func make(storeURL: URL? = nil, directory: URL? = nil, now: Date = ISO8601DateFormatter().date(from: "2026-10-02T14:00:00-04:00")!,
+                     linkPreviews: LinkPreviewFetching? = nil, linkPreviewTimeout: Duration = .seconds(15)) throws -> StoreHarness {
         let directory = directory ?? FileManager.default.temporaryDirectory.appendingPathComponent("wantwise-tests-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let container = try Persistence.makeContainer(url: storeURL)
@@ -74,7 +75,9 @@ struct StoreHarness {
             images: ImageFileStore(directory: directory.appendingPathComponent("Images"), encode: ImageEncoding.downsampledJPEG),
             reminders: scheduler,
             clock: { clock.now },
-            calendar: toronto()
+            calendar: toronto(),
+            linkPreviews: linkPreviews,
+            linkPreviewTimeout: linkPreviewTimeout
         )
         return StoreHarness(container: container, store: store, clock: clock, center: center, scheduler: scheduler, directory: directory)
     }
@@ -95,5 +98,26 @@ func makePNG(width: Int, height: Int) -> Data {
     return renderer.pngData { context in
         UIColor.orange.setFill()
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+    }
+}
+
+/// Stand-in for LPMetadataProvider: no network in tests.
+final class FakeLinkPreviews: LinkPreviewFetching, @unchecked Sendable {
+    enum Behaviour { case succeed(LinkPreview), fail, hang }
+    let behaviour: Behaviour
+    private(set) var requested: [URL] = []
+    private let lock = NSLock()
+
+    init(_ behaviour: Behaviour) { self.behaviour = behaviour }
+
+    func preview(for url: URL) async throws -> LinkPreview {
+        lock.withLock { requested.append(url) }
+        switch behaviour {
+        case .succeed(let preview): return preview
+        case .fail: throw URLError(.notConnectedToInternet)
+        case .hang:
+            try await Task.sleep(for: .seconds(3600))
+            throw CancellationError()
+        }
     }
 }

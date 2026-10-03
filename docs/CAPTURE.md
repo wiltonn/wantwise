@@ -97,6 +97,7 @@ The `CapturedWant` Codable type lives in `WantWiseCore` so both targets (and Lin
 
 - Accept `public.url`. Store as `productURL`, `sourceType = sharedURL`.
 - Title defaults to the URL host ("amazon.ca") until the app fetches link metadata on import (`LPMetadataProvider`: title + image). The fetched preview image becomes the Want's image if none was shared.
+- As built (Milestone 2): right after importing a `sharedURL` Want, or a `sharedText` Want with a link, that has no image, `WantStore` fetches a preview in the background (`LinkPresentationFetcher` behind `LinkPreviewFetching`, 15 s timeout). The page title replaces the title only if it is empty or just the host; the page image (site icon as a last resort) is downsampled through `ImageFileStore` like any other picture. Failures leave the Want unchanged. One attempt per import: there is no retry on later launches (no schema change to remember attempts).
 - Later option: Safari `NSExtensionJavaScriptPreprocessingFile` to read the page title / `og:image` directly from the page in the extension.
 
 ## Shared text
