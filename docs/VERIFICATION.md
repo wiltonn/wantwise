@@ -9,7 +9,7 @@ What has actually been tested, and where. Update this file whenever something is
 | 🍎 **MAC/XCODE VERIFIED** | Built/run with Xcode on macOS (record Xcode + iOS runtime versions) |
 | ⏳ Not started | |
 
-_Last updated: 2026-10-02 (Mac Follow-up 4, Milestone 2 capture: MacinCloud, Xcode 26.3, iOS 18.5 / 26.3.1 Simulators)_
+_Last updated: 2026-10-02 (Mac Follow-up 5, D-032: MacinCloud, Xcode 26.3, iOS 18.5 / 26.3.1 Simulators)_
 
 ## iOS: domain (WantWiseCore)
 
@@ -44,13 +44,14 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | WantStore (single write path) | `Store/WantStore.swift` | 🍎 compiled; unit tests |
 | Image encoding (ImageIO) + image cache | `Shared/ImageEncoding.swift`, `DesignSystem/WantArtwork.swift` | 🍎 compiled; unit tests (downsampling, replace, unreadable); sample screenshots render |
 | Local reminders + tap routing | `Notifications/*` | 🍎 compiled; scheduling logic unit-tested against a fake centre. 📝 real delivery and tap routing |
-| Screens: list, add/edit, finish adding, detail, reconsider, decided | `Features/**` | 🍎 compiled; list, add, detail, reconsider, decided exercised by UI tests. 📝 edit, finish adding (not driven) |
+| Screens: list, add/edit, finish adding, detail, reconsider, decided | `Features/**` | 🍎 compiled; list, add, detail, reconsider, decided exercised by UI tests; finish adding driven by a throwaway XCUITest (Follow-up 5). 📝 edit (not driven) |
 | Root, tabs, app environment, launch arguments | `App/*` | 🍎 |
 | DEBUG sample data, previews, debug menu | `DebugSupport/*` | 🍎 sample data + "Make one ready" used by UI tests |
 | Share Extension skeleton | `WantWiseShare/*` | 🍎 compiles and embeds; behaviour: see below |
 | Link previews on import | `LinkPreviews/LinkPreviewFetcher.swift`, `Store/WantStore.swift` | 🍎 compiled; 7 unit tests with a fake fetcher (host title replaced, typed title kept, image downsampled to 2048 px JPEG, shared-text link, Wants with a picture skipped, failure and timeout leave the Want unchanged). 🍎 real `LPMetadataProvider` fetch in the Simulator (see behaviour) |
 | Take photo (camera) | `Features/AddWant/CameraPicker.swift`, `AddWantView.swift`, `NSCameraUsageDescription` | 🍎 compiles; purpose string present in the built Info.plist; button correctly hidden in the Simulator (no camera). 📝 camera, permission prompt and saved photo need a physical iPhone |
-| Unit tests (WantStore, SwiftData, images, reminders, relaunch, import, link previews) | `WantWiseTests/*` | 🍎 27 tests in 6 suites pass (iOS 18.5 and 26.3.1) |
+| Share without a reason → Finish adding (D-032) | `CapturedWant.makeWant`, `WantWiseShare/Capture*.swift` | 🍎 core tests (reason → waiting with its date; nil / empty / whitespace reason → captured with no revisit; past date with a reason → ready); app unit test: import puts the reason-less share in *Finish adding* with no reminder, finishing it schedules one. 📝 core change not yet run on Linux |
+| Unit tests (WantStore, SwiftData, images, reminders, relaunch, import, link previews) | `WantWiseTests/*` | 🍎 28 tests in 6 suites pass (iOS 18.5 and 26.3.1) |
 | UI tests (add, relaunch, reconsider, full Milestone 1 loop) | `WantWiseUITests/*` | 🍎 4 tests pass (iOS 18.5 and 26.3.1) |
 | SwiftUI previews | in each view file | 🍎 compile (`ENABLE_PREVIEWS`); 📝 not opened in the canvas |
 
@@ -70,6 +71,7 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Share Extension: Safari → Share → WantWise (URL) | 🍎 iOS 18.5 and 26.3.1, unsigned, throwaway XCUITest: capture screen shows the host (`www.apple.com`), *Add to WantWise* saves, the app imports it and the link preview replaces the title with the page title and adds the page image (`docs/ios-screens/share-url-capture.png`, `share-url-imported.png`). On iOS 26 Safari, Share is behind the ••• button |
 | Share Extension: Photos → Share (image), re-run | 🍎 iOS 18.5 and 26.3.1: saved and imported with the screenshot (`docs/ios-screens/share-image-imported.png`) |
 | Link preview, before/after | 🍎 iPhone 16 / iOS 18.5: a `sharedURL` capture written into the App Group inbox (`https://www.apple.com/airpods-pro/`, title `www.apple.com`) imports with the host title and placeholder art, then within seconds shows "AirPods Pro 3" with the page image (stored as a 1024×537 JPEG in `Images/`). `docs/ios-screens/link-preview-before.png`, `link-preview-after.png` |
+| Share without a reason → Finish adding → finish → grid (D-032) | 🍎 iPhone 16 / iOS 18.5, throwaway XCUITest from Photos. With no reason, the extension says "Open WantWise to say why you want it." (`share-saved-no-reason.png`). The share shows under *Finish adding* (`share-no-reason-finish-adding.png`); adding a reason and saving moves it to the grid with "7 days left" (`share-no-reason-finished.png`). With a reason, the extension shows the revisit date and the share goes straight to the grid (`share-saved-with-reason.png`, `share-with-reason-grid.png`) |
 | Link inside shared text | 🍎 unit tests only (core + app import). 📝 not shared from a real app (e.g. Notes) in the Simulator |
 | Device install / TestFlight | ⏳ Stage 3 |
 
@@ -132,3 +134,11 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
 - **Captured vs waiting (Follow-up 4's open question):** the extension always has a wait choice selected and always writes `revisitAt`, so every share imported as `waiting`, never `captured`. Nate since decided D-032 (no reason → *Finish adding*); that is Follow-up 5, not done here.
 - **Compliance review** (app-store-reviewer, run as a general-purpose agent with its instructions because the agent type wasn't loaded): no blockers. It flagged an untested claim about `http` previews (reworded) and a misleading Milestone 3 line (fixed). Recommendation: mention link-preview traffic in the TestFlight review notes.
 - **Still 📝:** camera (physical iPhone), Linux `swift test` for the new core code, shared text from a real app, `http` link previews under ATS.
+
+### 2026-10-02 — MacinCloud, Follow-up 5: D-032 (same machine and versions)
+
+- **Built:** a share imports as `waiting` only when it has a reason (whitespace counts as blank). Otherwise it is `captured` with no `revisitAt` / `waitStartedAt` and shows under *Finish adding*. The extension's "Saved" copy changes when there's no reason. The inbox format stays at v1 (8dd7f2c).
+- **Tests:** WantWiseCore 84/84 (macOS), unit 28/28, UI 4/4 on iPhone 16 / iOS 18.5 and iPhone 17 / iOS 26.3.1. `ReminderPlanner` plans only `waiting` Wants; the new unit test confirms a reason-less import gets no reminder and that finishing it schedules one.
+- **Simulator:** both flows (no reason → finish → grid; with reason → grid) via a throwaway XCUITest on iOS 18.5 (not committed). Screenshots in `docs/ios-screens/share-*reason*.png`.
+- **Fixed:** in *Finish adding*, the keyboard covered *Save*, and return only adds a new line in the multi-line reason field. Neither scrolling nor tapping elsewhere dismissed the keyboard, so a child couldn't save without guessing. Added the same keyboard *Done* button as Add Want, plus `scrollDismissesKeyboard(.interactively)`. Found by driving this screen for the first time.
+- **Still 📝:** Linux `swift test` for the core change; this flow on iOS 26.3.1 (only the regular test suite ran there).
