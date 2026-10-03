@@ -93,6 +93,18 @@ struct AddWantView: View {
     // MARK: - Form
 
     private var form: some View {
+        // Keep the focused field clear of the keyboard and its toolbar. On iOS 26 the keyboard toolbar otherwise
+        // covers the price field once the title field has focus.
+        ScrollViewReader { proxy in
+            formContent
+                .onChange(of: focus) { _, field in
+                    guard let field else { return }
+                    withAnimation { proxy.scrollTo(field, anchor: .center) }
+                }
+        }
+    }
+
+    private var formContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 pictureSection
@@ -101,6 +113,7 @@ struct AddWantView: View {
                     TextField("e.g. Wireless headphones", text: $title)
                         .font(.wwTitle2)
                         .focused($focus, equals: .title)
+                        .id(Field.title)
                         .submitLabel(.next)
                         .onSubmit { focus = .price }
                         .accessibilityIdentifier("titleField")
@@ -115,6 +128,7 @@ struct AddWantView: View {
                             .font(.wwTitle2)
                             .keyboardType(.decimalPad)
                             .focused($focus, equals: .price)
+                            .id(Field.price)
                             .accessibilityIdentifier("priceField")
                     }
                 }
@@ -124,6 +138,7 @@ struct AddWantView: View {
                         .font(.wwBody)
                         .lineLimit(2...5)
                         .focused($focus, equals: .reason)
+                        .id(Field.reason)
                         .accessibilityIdentifier("reasonField")
                 }
 
