@@ -31,3 +31,13 @@ Build with `mac-build.sh uitest` (fix compile errors minimally), then `mac-build
 ## Follow-up 2 (typed prompt: `Do Follow-up 2 in docs/MAC_KICKOFF.md.`)
 
 `git pull --rebase`. A privacy manifest was added in WSL (`apps/ios/Config/PrivacyInfo.xcprivacy`, D-031, wired into both targets in `project.yml`). Run `mac-build.sh test`, then confirm `find apps/ios/build/DerivedData/Build/Products -name PrivacyInfo.xcprivacy` lists one in `WantWise.app` and one in `WantWise.app/PlugIns/WantWiseShare.appex`. If both are there, change the 📝 part of the "Privacy manifest" row in docs/VERIFICATION.md to 🍎 with the Xcode version, and the matching 📝 note in docs/APP_STORE_COMPLIANCE.md. Then run the `app-store-reviewer` agent and include its report. Commit, push, and report.
+
+## Follow-up 3 (typed prompt: `Do Follow-up 3 in docs/MAC_KICKOFF.md.`)
+
+`git pull --rebase`. Check that a **Release** build ships no debug code or sample images (D-027), unsigned, for the Simulator:
+
+```bash
+cd apps/ios && xcodegen generate && xcodebuild -project WantWise.xcodeproj -scheme WantWise -configuration Release -destination 'generic/platform=iOS Simulator' -derivedDataPath build/DerivedDataRelease CODE_SIGNING_ALLOWED=NO build
+```
+
+Then in `build/DerivedDataRelease/Build/Products/Release-iphonesimulator/WantWise.app`: no `debug-sample-*` files (also inside `Assets.car`: `xcrun assetutil --info`), `strings` on the app binary finds no `WantWiseSampleData` / `WantWiseResetData`, and `PrivacyInfo.xcprivacy` is present in the app and the `.appex`. Install and launch it in a Simulator: no ladybug menu. Record the result in docs/VERIFICATION.md and turn the "Debug code" row in docs/APP_STORE_COMPLIANCE.md to 🍎 only if it passes. Fix minimally if it doesn't. Commit, push, report.
