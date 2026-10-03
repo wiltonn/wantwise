@@ -73,3 +73,13 @@ Add a camera option next to the existing PhotosPicker, as a thin `UIImagePickerC
 - docs/IOS_ROADMAP.md Milestone 2 status, and docs/CAPTURE.md if behaviour differs from what it says.
 
 Finish with a report: what was built, tests (core/unit/UI counts), what was verified in the Simulator with screenshots, compliance-review result, the captured-vs-waiting finding, and what still needs a physical iPhone.
+
+## Follow-up 5 — no reason → Finish adding (typed prompt: `Do Follow-up 5 in docs/MAC_KICKOFF.md.`)
+
+Only after Follow-up 4 is pushed. `git pull --rebase`, then implement **D-032** in docs/DECISIONS.md (it answers Follow-up 4's open question):
+
+1. `WantWiseCore`: in `CapturedWant.makeWant`, import as `waiting` with the capture's `revisitAt` only when `reason` is non-blank (whitespace counts as blank); otherwise `captured` with no `revisitAt` / `waitStartedAt`. `createdAt` still comes from the capture. Keep the inbox format at version 1. Unit tests in `WantWiseCore/Tests` for: reason → waiting with that date; blank / whitespace / nil reason → captured; past revisit date with a reason → waiting (ready to reconsider). Must pass `swift test` on macOS (and stay Linux-safe).
+2. Share Extension: when saved without a reason, the "Saved" screen says something like "Saved. Open WantWise to say why you want it." instead of the revisit date. Keep the copy short and child-friendly, matching the existing tone.
+3. App: confirm an imported reason-less capture appears under *Finish adding*, gets no reminder (`ReminderPlanner` only plans waiting Wants, but check), and that finishing it schedules one. Add or extend an app unit test around import + reminders if there isn't one.
+4. Check in the Simulator: share an image with no reason → it shows under *Finish adding* → finish it → it moves to the grid with a countdown. Then share with a reason → it goes straight to the grid. Screenshot both.
+5. Update docs/CAPTURE.md (the sentence about tapping Add without a reason) and docs/VERIFICATION.md. Commit, push, report.
