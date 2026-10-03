@@ -27,6 +27,8 @@ struct AddWantView: View {
     @State private var imageData: Data?
     @State private var imagePreview: UIImage?
     @State private var imageRemoved = false
+    @State private var imageFromCamera = false
+    @State private var showCamera = false
     @State private var savedWant: Want?
     @State private var savedImageURL: URL?
     @State private var defaultCurrency = "CAD"
@@ -107,7 +109,18 @@ struct AddWantView: View {
     private var formContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                pictureSection
+                VStack(spacing: 12) {
+                    pictureSection
+                    if CameraPicker.isAvailable {
+                        Button {
+                            showCamera = true
+                        } label: {
+                            Label("Take photo", systemImage: "camera")
+                        }
+                        .buttonStyle(.wwSecondary)
+                        .accessibilityIdentifier("takePhoto")
+                    }
+                }
 
                 field(label: "What is it?") {
                     TextField("e.g. Wireless headphones", text: $title)
@@ -169,6 +182,10 @@ struct AddWantView: View {
                 .accessibilityIdentifier("saveWant")
         }
         .onChange(of: photoItem) { _, item in loadPhoto(item) }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker(onImage: useCameraPhoto)
+                .ignoresSafeArea()
+        }
     }
 
     private var pictureSection: some View {
@@ -214,6 +231,7 @@ struct AddWantView: View {
                     imagePreview = nil
                     photoItem = nil
                     imageRemoved = true
+                    imageFromCamera = false
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 28))
@@ -269,10 +287,24 @@ struct AddWantView: View {
             }
             imageData = data
             imageRemoved = false
+            imageFromCamera = false
             // Preview from a downsampled copy so huge photos don't spike memory.
             let preview = (try? ImageEncoding.downsampledJPEG(data)).flatMap(UIImage.init(data:))
             imagePreview = preview
         }
+    }
+
+    /// Same path as a library pick: the store downsamples and saves it; this copy is only for the preview.
+    private func useCameraPhoto(_ image: UIImage) {
+        guard let data = image.jpegData(compressionQuality: 0.9) else {
+            errorMessage = "That picture couldn't be loaded."
+            return
+        }
+        photoItem = nil
+        imageData = data
+        imageRemoved = false
+        imageFromCamera = true
+        imagePreview = (try? ImageEncoding.downsampledJPEG(data)).flatMap(UIImage.init(data:))
     }
 
     private func loadForEditing() {
@@ -294,7 +326,7 @@ struct AddWantView: View {
         do {
             switch mode {
             case .add:
-                let sourceType: SourceType = imageData.flatMap(ImageEncoding.pixelSize(of:)).map {
+                let sourceType: SourceType = imageFromCamera ? .photo : imageData.flatMap(ImageEncoding.pixelSize(of:)).map {
                     SourceType.inferredForLibraryImage(width: $0.width, height: $0.height)
                 } ?? .manual
                 let draft = WantDraft(
