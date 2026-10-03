@@ -62,7 +62,7 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Reconsider: still want / wait longer / don't need it | 🍎 wait longer → still want via UI test, with history on detail + Timeline surviving relaunch; "don't need it" unit-tested only |
 | Reminder delivered; tap opens Want | 📝 needs a human in the Simulator (§6 check 11) |
 | Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. Known issue: on the SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll |
-| Share Extension: Photos → Share → WantWise | 📝 (optional in first session) |
+| Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Cosmetic: the extension's nav title is black on the dark background |
 | Device install / TestFlight | ⏳ Stage 3 |
 
 ## Display
@@ -96,4 +96,6 @@ _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what wa
   - Runtime: the poster artwork's blurred `scaledToFill` layer sized the view, so the ready card's image overflowed its frame and covered *Think about it* (taps never reached it). Caught by `testReconsiderReadySampleWant`.
   - iOS 26: the keyboard toolbar covered the price field after the title had focus; the form now scrolls the focused field to the centre.
 - **Added:** `testMilestone1AcceptanceLoop` (§6 checks 4, 6, 8, 9, 10 automated).
-- **Still 📝:** PhotosPicker, real notification delivery + tap, edit/finish-adding screens, Dynamic Type, Share Extension behaviour (below).
+- **Share Extension:** works end to end in the Simulator without signing (see table). Not a blocker; real-device App Group needs signing (Stage 3).
+- **Still 📝:** PhotosPicker, real notification delivery + tap, edit/finish-adding screens, Dynamic Type.
+- **Known layout issues (not fixed, design call):** on the iPhone SE the floating *Add a Want* button covers the ready card's *Think about it* until you scroll; Share Extension nav title is invisible (black on dark).
