@@ -62,7 +62,7 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 | Detail shows time remaining | 📝 detail opened only for a decided Want |
 | Reconsider: still want / wait longer / don't need it | 🍎 wait longer → still want via UI test, with history on detail + Timeline surviving relaunch; "don't need it" unit-tested only |
 | Reminder delivered; tap opens Want | 📝 needs a human in the Simulator (§6 check 11) |
-| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. SE overlap fixed (Follow-up 1): *Add a Want* is a bottom bar (`safeAreaInset`), so card content scrolls clear of it; at rest the first card's *Think about it* sits under the bar, and one swipe up exposes it and it taps through to the decision screen (throwaway XCUITest on iPhone SE / iOS 18.6) |
+| Layout on iPhone SE / standard / Pro Max | 🍎 home screen, `docs/ios-screens/`. SE overlap fixed (Follow-up 1): *Add a Want* is a bottom bar (`safeAreaInset`), so card content scrolls clear of it; at rest the first card's *Think about it* sits under the (opaque) bar, and one swipe up exposes it and it taps through to the decision screen (throwaway XCUITest on iPhone SE / iOS 18.6) |
 | Share Extension: Photos → Share → WantWise | 🍎 iOS 18.5, unsigned: WantWise appears in the share sheet, capture screen shows the screenshot, *Add to WantWise* saves, and the app imports it with the image on next activation (`docs/ios-screens/share-*.png`, driven by a throwaway XCUITest). App Group works through Xcode's simulated entitlements (`group.tech.wantwise.app`). Nav title and placeholders now readable on dark (`overrideUserInterfaceStyle = .dark`, Follow-up 1; capture screen re-checked on iPhone 16 / iOS 18.5) |
 | Device install / TestFlight | ⏳ Stage 3 |
 

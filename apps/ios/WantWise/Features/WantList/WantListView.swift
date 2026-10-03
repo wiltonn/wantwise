@@ -88,7 +88,7 @@ struct WantListView: View {
                 AddWantFloatingButton { showingAdd = true }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 12)
-                    .background(Theme.background.opacity(0.95))
+                    .background(Theme.background)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
