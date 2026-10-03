@@ -41,6 +41,67 @@ final class WantWiseUITests: XCTestCase {
         app.buttons["doneAfterDecision"].tap()
     }
 
+    /// The Milestone 1 loop end to end on the on-disk store (CLOUD_MAC_SESSION.md §6, checks 4–10):
+    /// add → list → relaunch → reconsider (wait longer) → decide → decision history → relaunch.
+    func testMilestone1AcceptanceLoop() {
+        let title = "Acceptance kite"
+        var app = launch(["-WantWiseResetData"])
+        addWant(app, title: title, price: "25", reason: "Windy days")
+        XCTAssertTrue(wantCard(app, titled: title).waitForExistence(timeout: 5))
+
+        app.terminate()
+        app = launch()
+        XCTAssertTrue(wantCard(app, titled: title).waitForExistence(timeout: 5), "Want lost on relaunch")
+
+        // First reconsideration: wait longer.
+        makeOnlyWantReady(app)
+        app.buttons["thinkAboutIt"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["decision-waitLonger"].waitForExistence(timeout: 5))
+        app.buttons["decision-waitLonger"].tap()
+        XCTAssertTrue(app.buttons["confirmWaitLonger"].waitForExistence(timeout: 5))
+        app.buttons["confirmWaitLonger"].tap()
+        XCTAssertTrue(app.buttons["doneAfterDecision"].waitForExistence(timeout: 5))
+        app.buttons["doneAfterDecision"].tap()
+        XCTAssertTrue(wantCard(app, titled: title).waitForExistence(timeout: 5), "Want should be waiting again")
+
+        // Second reconsideration: decide.
+        makeOnlyWantReady(app)
+        app.buttons["thinkAboutIt"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["decision-stillWant"].waitForExistence(timeout: 5))
+        app.buttons["decision-stillWant"].tap()
+        XCTAssertTrue(app.buttons["doneAfterDecision"].waitForExistence(timeout: 5))
+        app.buttons["doneAfterDecision"].tap()
+
+        assertDecidedWithHistory(app, title: title)
+
+        app.terminate()
+        app = launch()
+        assertDecidedWithHistory(app, title: title)
+    }
+
+    private func makeOnlyWantReady(_ app: XCUIApplication) {
+        let debug = app.buttons["debugMenu"]
+        XCTAssertTrue(debug.waitForExistence(timeout: 5))
+        debug.tap()
+        let makeReady = app.buttons["Make one ready to think again"]
+        XCTAssertTrue(makeReady.waitForExistence(timeout: 5))
+        makeReady.tap()
+        XCTAssertTrue(app.buttons["thinkAboutIt"].firstMatch.waitForExistence(timeout: 5))
+    }
+
+    private func assertDecidedWithHistory(_ app: XCUIApplication, title: String) {
+        app.tabBars.buttons["Decided"].tap()
+        let row = wantCard(app, titled: title)
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Decided Want missing")
+        row.tap()
+        XCTAssertTrue(app.staticTexts["Chose to wait longer"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Still wanted it"].exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        app.buttons["Timeline"].tap()
+        XCTAssertTrue(app.staticTexts["Chose to wait longer"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Still wanted it"].exists)
+    }
+
     /// Grid cards combine their children into one accessibility element, so match on the label.
     private func wantCard(_ app: XCUIApplication, titled title: String) -> XCUIElement {
         app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", title)).firstMatch

@@ -175,7 +175,9 @@ fi
 if [ "$MODE" = "screens" ]; then
   step "Screenshots on three sizes"
   mkdir -p "$LOGS/screens"
-  SMALL="$(find_device 'iPhone SE[^(]*|iPhone 1[0-9]e|iPhone 1[0-9] mini')"
+  # Prefer the 375pt-wide SE (the narrowest current iPhone) over a 390pt "e" model.
+  SMALL="$(find_device 'iPhone SE[^(]*')"
+  [ -n "$SMALL" ] || SMALL="$(find_device 'iPhone 1[0-9] mini|iPhone 1[0-9]e')"
   [ -n "$SMALL" ] || SMALL="$(create_device 'iPhone SE|iPhone 1[0-9]e' Small)"
   LARGE="$(find_device 'iPhone 1[5-9] Pro Max|iPhone 2[0-9] Pro Max')"
   [ -n "$LARGE" ] || LARGE="$(create_device 'Pro Max' ProMax)"
