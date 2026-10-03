@@ -14,6 +14,7 @@ struct FinishAddingView: View {
     @State private var customDay = Date()
     @State private var savedRevisit: Date?
     @State private var errorMessage: String?
+    @FocusState private var reasonFocused: Bool
 
     var body: some View {
         let want = entity.snapshot
@@ -35,6 +36,7 @@ struct FinishAddingView: View {
                             SectionLabel("What makes you want it?")
                             TextField("Because…", text: $reason, axis: .vertical)
                                 .lineLimit(2...5)
+                                .focused($reasonFocused)
                                 .padding(16)
                                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusSmall, style: .continuous))
                         }
@@ -55,11 +57,17 @@ struct FinishAddingView: View {
                 }
                 .padding(Theme.pagePadding)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle(want.displayTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Later") { dismiss() } }
+                // Same as Add Want: return adds a new line, so the keyboard (which covers Save) needs a way out.
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { reasonFocused = false }
+                }
             }
             .alert("Couldn't save", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("OK") { errorMessage = nil }
