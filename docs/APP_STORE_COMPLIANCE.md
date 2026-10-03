@@ -4,13 +4,13 @@ WantWise ships to the family through **TestFlight external testing** ([APPLE_HAN
 
 Run this before each TestFlight upload, and on any change that touches data, permissions, networking or dependencies. The `app-store-reviewer` agent (`.claude/agents/app-store-reviewer.md`) works through it.
 
-Status key: ✅ satisfied in the repo · ⚠️ check at upload time · 🔜 becomes relevant at a later milestone.
+Status key: ✅ satisfied in the repo · 🍎 confirmed in a Mac/Xcode build · ⚠️ check at upload time · 🔜 becomes relevant at a later milestone.
 
 ## Every build (TestFlight)
 
 | | Check | Status / where |
 |---|---|---|
-| Privacy manifest | `PrivacyInfo.xcprivacy` in the app **and** the Share Extension; no tracking, no collected data, no required-reason APIs | ✅ `apps/ios/Config/PrivacyInfo.xcprivacy`, wired in `project.yml` (D-031). 📝 needs a Mac build to confirm it lands in both bundles |
+| Privacy manifest | `PrivacyInfo.xcprivacy` in the app **and** the Share Extension; no tracking, no collected data, no required-reason APIs | ✅ `apps/ios/Config/PrivacyInfo.xcprivacy`, wired in `project.yml` (D-031). 🍎 Xcode 26.3: confirmed in the built `WantWise.app` and its embedded `WantWiseShare.appex` |
 | Required-reason APIs | No `UserDefaults`/`@AppStorage`, file timestamps (`creationDate`, `contentModificationDate`, `attributesOfItem`), disk space, system uptime, active keyboards. If one is added, declare it with an approved reason code in the manifest | ✅ none in `WantWise/`, `WantWiseShare/`, `Shared/`, `WantWiseCore/Sources` (grep, 2026-10-02) |
 | Third-party SDKs | None. Any new SDK must ship its own privacy manifest and signature | ✅ only Apple frameworks + WantWiseCore |
 | Export compliance | `ITSAppUsesNonExemptEncryption = NO` in the app's Info.plist | ✅ `Config/WantWise-Info.plist` |
@@ -34,5 +34,5 @@ Status key: ✅ satisfied in the repo · ⚠️ check at upload time · 🔜 bec
 ## How to check
 
 - **Repo scan** (any OS): ask Claude to run the `app-store-reviewer` agent, or grep for the APIs above.
-- **Bundle contents** (Mac, after `mac-build.sh`): `find apps/ios/build/DerivedData/Build/Products -name PrivacyInfo.xcprivacy` should list one in `WantWise.app` and one in `WantWise.app/PlugIns/WantWiseShare.appex`.
+- **Bundle contents** (Mac, after `mac-build.sh`): `find apps/ios/build/DerivedData/Build/Products -name PrivacyInfo.xcprivacy` should list one in `WantWise.app` and one in `WantWise.app/PlugIns/WantWiseShare.appex` (plus the standalone intermediate `WantWiseShare.appex` next to the app, which isn't shipped).
 - **Privacy report** (Mac, signed archive, Stage 3): Xcode Organizer → right-click the archive → **Generate Privacy Report**.

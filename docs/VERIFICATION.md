@@ -25,7 +25,7 @@ _Last updated: 2026-10-02 (first Mac session: MacinCloud, Xcode 26.3, iOS 18.5 /
 |---|---|---|
 | `project.yml` generates an Xcode project | ✅ | XcodeGen 2.46.0 built from source on Linux; `xcodegen generate` succeeds. Inspected pbxproj: per-target bundle IDs/entitlements/plists, SDK-conditional signing, embedded extension, local package linked into app + extension only, test hosts, Release exclusion of `debug-sample-*` |
 | Info.plists and entitlements are valid plists | ✅ | Python `plistlib` |
-| Privacy manifest (D-031) in app + extension | ✅ / 📝 | ✅ `Config/PrivacyInfo.xcprivacy` valid (`plistlib`); XcodeGen in WSL puts it in both targets' Resources phase (not Sources); grep finds no required-reason APIs. 📝 not yet confirmed inside the built `.app` / `.appex` on a Mac |
+| Privacy manifest (D-031) in app + extension | ✅ / 🍎 | ✅ `Config/PrivacyInfo.xcprivacy` valid (`plistlib`); XcodeGen in WSL puts it in both targets' Resources phase (not Sources); grep finds no required-reason APIs. 🍎 Xcode 26.3 (17C529): present in the built `WantWise.app` and `WantWise.app/PlugIns/WantWiseShare.appex` (Debug, Simulator) |
 | Asset catalog JSON valid; icon 1024², RGB (no alpha) | ✅ | `json.tool`, Pillow |
 | Xcode builds the generated project | 🍎 | `xcodebuild` Debug Simulator build, Xcode 26.3 (17C529), iOS Simulator SDK 26.2; app + Share Extension + both test bundles |
 | Simulator build with no team (D-026) | 🍎 | Builds with `DEVELOPMENT_TEAM` empty; the `CODE_SIGNING_ALLOWED=NO` fallback was **not** needed |
