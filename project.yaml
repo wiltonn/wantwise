@@ -1,0 +1,11 @@
+schema: openrig.project/v0alpha1
+kind: project
+metadata:
+  id: wantwise
+install:
+  intent: SPEC.md
+  skills: []
+missions:
+  root: missions
+proofPolicy:
+  judges: [review-verifier@poc]
