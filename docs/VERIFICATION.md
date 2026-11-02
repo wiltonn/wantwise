@@ -91,6 +91,14 @@ An independent pre-Mac review (2026-10-02) checked every file against iOS 17 API
 |---|---|
 | `docs/fixtures/countdown-cases.json` passes in Swift and TypeScript | ✅ |
 
+## Apple requirements catalogue
+
+| Item | Status | Evidence |
+|---|---|---|
+| `.claude/skills/apple-requirements/lint_rules.py` passes on `rules.yaml` (53 rules) | ✅ | Python 3.12.3 in WSL, 2026-11-02. Also run against broken copies: fails on a missing field, a non-Apple or look-alike host, a non-date `checked`, a missing test path, an unknown `todo:` slice, a checklist on a static rule, a duplicate id and an unknown field |
+| Rule text read from Apple's pages | ✅ | Fetched 2026-11-02 (App Review Guidelines HTML; developer documentation via its JSON; App Store Connect Help; HIG). The Sign in with Apple overview page returned no readable body; rules that pages didn't settle are `status_now: unknown` |
+| `status_now` judgements | ✅ / 📝 | ✅ static facts from greps and plist reads in WSL (no required-reason APIs, no private-API strings, no third-party packages, purpose strings, `ITSAppUsesNonExemptEncryption`). 📝 `simulator` rules (permission timing, accessibility, large text) are `unknown` until slice 03 runs on a Mac |
+
 ## Mac session log
 
 _(Add one entry per session: date, provider, macOS, Xcode, iOS runtimes, what was verified, what was fixed.)_

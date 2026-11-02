@@ -1,0 +1,913 @@
+# Apple requirements for WantWise: a sourced, dated rule catalogue.
+#
+# Every rule was read from the Apple page in `source` on the `checked` date. Nothing here comes from
+# memory; where a fetched page was silent or ambiguous, the rule says so and `status_now` is `unknown`.
+# Format, field meanings and how to refresh: SKILL.md next to this file. Lint: `python3 lint_rules.py`.
+#
+# This file uses a small YAML subset so the linter needs only the Python standard library:
+# one top-level `rules:` list of flat mappings; values are plain or quoted scalars on one line,
+# or a `>` folded block indented under the key. No anchors, flow collections or nested mappings.
+#
+# Pages fetched 2026-11-02 (attempt b607bb87). Documentation pages were read through Apple's
+# documentation JSON (developer.apple.com/tutorials/data/documentation/<path>.json), which is the
+# content behind the human URL given in `source`.
+
+rules:
+
+  # ---------------------------------------------------------------- App Review Guidelines: kids
+
+  - id: AR-GL-1.3-kids-category
+    title: Kids Category apps have no links out, purchases or distractions without a parental gate, and no third-party analytics or ads
+    area: kids_category
+    source: https://developer.apple.com/app-store/review/guidelines/#kids-category
+    checked: 2026-11-02
+    applies_when: kids_category
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      1.3: Kids Category apps "must not include links out of the app, purchasing opportunities, or
+      other distractions to kids unless reserved for a designated area behind a parental gate" and
+      "should not include third-party analytics or third-party advertising".
+    notes: >
+      WantWise is distributed by TestFlight only and is not listed in the Kids Category (D-031). Applies
+      only if a public Kids Category listing is ever chosen.
+
+  - id: AR-GL-5.1.4-kids-no-third-party-analytics
+    title: An app intended primarily for kids has no third-party analytics or third-party advertising
+    area: kids_category
+    source: https://developer.apple.com/app-store/review/guidelines/#kids
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      5.1.4(a): "Apps intended primarily for kids should not include third-party analytics or
+      third-party advertising."
+    notes: >
+      The user is a child, so this applies regardless of category. project.yml has one package, the
+      local WantWiseCore; no analytics, crash or ad SDK (grep, 2026-11-02).
+
+  - id: AR-GL-5.1.4-kids-privacy-policy
+    title: An app that collects or transmits personal information from a minor has a privacy policy and follows children's privacy law
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#kids
+    checked: 2026-11-02
+    applies_when: data_leaves_device
+    milestone: 3
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#later-milestones
+    status_now: not_applicable_yet
+    requirement: >
+      5.1.4(b): apps in the Kids Category "or those that collect, transmit, or have the capability to
+      share personal information ... from a minor must include a privacy policy and must comply with
+      all applicable children's privacy statutes."
+    notes: >
+      Milestone 3 (Supabase sync) sends the child's Wants to a server we control; this then applies in
+      full (COPPA in the US, GDPR-K elsewhere). Today the only network use is the Milestone 2 link
+      preview, which sends the shared URL and the device's IP address to the shared site. Our reading is
+      that this is not "personal information from a minor" sent to us; a person should confirm that
+      reading before the first upload.
+
+  # ---------------------------------------------------------------- App Review Guidelines: 2.x
+
+  - id: AR-GL-2.1-no-crash
+    title: The submitted build is complete and doesn't crash or show obvious technical problems
+    area: app_completeness
+    source: https://developer.apple.com/app-store/review/guidelines/#app-completeness
+    checked: 2026-11-02
+    applies_when: always
+    check: simulator
+    test: apps/ios/WantWiseUITests/WantWiseUITests.swift
+    status_now: met
+    requirement: >
+      2.1(a): "We will reject incomplete app bundles and binaries that crash or exhibit obvious
+      technical problems."
+    notes: >
+      Milestone 1 loop and UI tests passed in the Simulator (Xcode 26.3, docs/VERIFICATION.md). Re-run
+      on the exact build that is uploaded.
+
+  - id: AR-GL-2.1-no-placeholder-content
+    title: No placeholder text, empty websites or other temporary content in the submitted build
+    area: app_completeness
+    source: https://developer.apple.com/app-store/review/guidelines/#app-completeness
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      2.1(a): "placeholder text, empty websites, and other temporary content should be scrubbed before
+      submission".
+    notes: >
+      grep of string literals in WantWise/, WantWiseShare/ and Shared/ for TODO, FIXME, Lorem and
+      placeholder found none (2026-11-02). DEBUG-only sample data is excluded from Release (D-027).
+
+  - id: AR-GL-2.1-demo-account
+    title: If the app has a login, give App Review a working demo account and keep the back end on
+    area: app_completeness
+    source: https://developer.apple.com/app-store/review/guidelines/#app-completeness
+    checked: 2026-11-02
+    applies_when: account_signin
+    milestone: 3
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      2.1(a): "include demo account info (and turn on your back-end service!) if your app includes a
+      login". App Store Connect's App Review information says the demo account "must not expire".
+    notes: >
+      Milestone 3 parent sign-in (D-017). Also stated at
+      https://developer.apple.com/help/app-store-connect/reference/app-review-information (fetched
+      2026-11-02).
+
+  - id: AR-GL-2.2-testflight-intended-for-public
+    title: A TestFlight beta should be intended for public distribution and follow the App Review Guidelines
+    area: testflight
+    source: https://developer.apple.com/app-store/review/guidelines/#beta-testing
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#every-build-testflight
+    status_now: not_met
+    requirement: >
+      2.2: "Any app submitted for beta distribution via TestFlight should be intended for public
+      distribution and should comply with the App Review Guidelines." TestFlight builds can't be
+      distributed for compensation.
+    notes: >
+      Conflicts with the current plan: TestFlight for one family with no public listing planned (D-014,
+      D-031). Recorded as an open note in docs/DECISIONS.md (D-033); the decision itself is unchanged.
+      Guideline wording is "should", so this is a review risk, not a stated upload block.
+
+  - id: AR-GL-2.2-significant-updates-reviewed
+    title: Significant updates to a beta build go to TestFlight App Review before testers get them
+    area: testflight
+    source: https://developer.apple.com/app-store/review/guidelines/#beta-testing
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      2.2: "Significant updates to your beta build should be submitted to TestFlight App Review before
+      being distributed to your testers."
+    notes: No build has been uploaded yet (Stage 3).
+
+  - id: AR-GL-2.3.1-review-notes
+    title: New features and changes are described specifically in the Notes for Review
+    area: accurate_metadata
+    source: https://developer.apple.com/app-store/review/guidelines/#2.3.1
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#every-build-testflight
+    status_now: not_applicable_yet
+    requirement: >
+      2.3.1(a): "All new features, functionality, and product changes must be described with
+      specificity in the Notes for Review section of App Store Connect (generic descriptions will be
+      rejected) and accessible for review."
+    notes: >
+      Include the link-preview network note from docs/APP_STORE_COMPLIANCE.md (shared URL and IP go to
+      the shared site) in the review notes.
+
+  - id: AR-GL-2.3.6-age-rating
+    title: Answer the age rating questions honestly
+    area: accurate_metadata
+    source: https://developer.apple.com/app-store/review/guidelines/#2.3.6
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#app-store-connect-record
+    status_now: not_applicable_yet
+    requirement: >
+      2.3.6: "Answer the age rating questions in App Store Connect honestly so that your app aligns
+      properly with parental controls."
+
+  - id: AR-GL-2.3.7-app-name
+    title: Unique app name of at most 30 characters, keywords not stuffed
+    area: accurate_metadata
+    source: https://developer.apple.com/app-store/review/guidelines/#2.3.7
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#app-store-connect-record
+    status_now: not_applicable_yet
+    requirement: >
+      2.3.7: "Choose a unique app name ... App names must be limited to 30 characters."
+    notes: The intended name "WantWise" is 8 characters; uniqueness is only known in App Store Connect.
+
+  - id: AR-GL-2.3.8-metadata-all-audiences
+    title: Metadata suits a 4+ rating, and "For Kids" / "For Children" are reserved for the Kids Category
+    area: accurate_metadata
+    source: https://developer.apple.com/app-store/review/guidelines/#2.3.8
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      2.3.8: metadata should "adhere to a 4+ age rating"; "Use of terms like 'For Kids' and 'For
+      Children' in app metadata is reserved in the App Store for the Kids Category."
+    notes: >
+      The suggested Beta App Description in APPLE_HANDOFF.md ("Private family app for a child to think
+      before buying things") doesn't use the reserved phrases; keep it that way.
+
+  - id: AR-GL-2.5.1-public-apis
+    title: Only public APIs; runs on the currently shipping OS
+    area: app_completeness
+    source: https://developer.apple.com/app-store/review/guidelines/#2.5.1
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      2.5.1: "Apps may only use public APIs and must run on the currently shipping OS."
+    notes: >
+      grep for NSSelectorFromString, dlopen, dlsym and string-selector perform found none in the source
+      folders (2026-11-02).
+
+  - id: AR-GL-2.5.4-background-modes
+    title: Background services only for their intended purpose
+    area: app_completeness
+    source: https://developer.apple.com/app-store/review/guidelines/#2.5.4
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      2.5.4: "Multitasking apps may only use background services for their intended purposes: VoIP,
+      audio playback, location, task completion, local notifications, etc."
+    notes: No UIBackgroundModes key in either Info.plist (2026-11-02); reminders are local notifications (D-016).
+
+  # ---------------------------------------------------------------- App Review Guidelines: 4.x
+
+  - id: AR-GL-4.5.4-notifications
+    title: Notifications are not required to use the app and carry no marketing or sensitive content
+    area: purpose_strings
+    source: https://developer.apple.com/app-store/review/guidelines/#4.5.4
+    checked: 2026-11-02
+    applies_when: notifications
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: met
+    requirement: >
+      4.5.4: "Push Notifications must not be required for the app to function, and should not be used
+      to send sensitive personal or confidential information. Push Notifications should not be used
+      for promotions or direct marketing purposes unless customers have explicitly opted in".
+    notes: >
+      The guideline names push notifications; WantWise sends local reminders only (D-016). Reminder
+      content is the child's own Want, not marketing. Whether the app works with notifications denied
+      is checked by AR-GL-5.1.2-no-required-system-features.
+
+  - id: AR-GL-4.8-login-services
+    title: Third-party or social login for the primary account needs an equivalent privacy-preserving login option
+    area: login_services
+    source: https://developer.apple.com/app-store/review/guidelines/#4.8
+    checked: 2026-11-02
+    applies_when: third_party_login
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      4.8: apps that use a third-party or social login service "to set up or authenticate the user's
+      primary account with the app must also offer as an equivalent option another login service"
+      that limits data collection to name and email, lets users keep their email private, and doesn't
+      collect interactions for advertising without consent. Exempt: apps that "exclusively use your
+      company's own account setup and sign-in systems", and some education/enterprise cases.
+    notes: >
+      Milestone 3 parent sign-in (D-017). If it uses only our own (Supabase email) accounts, 4.8 doesn't
+      apply; if it adds Google or similar, offer Sign in with Apple or an equivalent. The Sign in with
+      Apple overview page (developer.apple.com/sign-in-with-apple/) returned no readable body on
+      2026-11-02, so its details are not recorded here.
+
+  # ---------------------------------------------------------------- App Review Guidelines: 5.1.1
+
+  - id: AR-GL-5.1.1i-privacy-policy
+    title: A privacy policy link in App Store Connect and inside the app
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#every-build-testflight
+    status_now: not_met
+    requirement: >
+      5.1.1(i): "All apps must include a link to their privacy policy in the App Store Connect metadata
+      field and within the app in an easily accessible manner." The policy says what is collected, how,
+      all uses, retention and deletion, and how to revoke consent or request deletion.
+    notes: >
+      WantWise has no privacy policy and no in-app link. docs/APP_STORE_COMPLIANCE.md listed a policy as
+      a Milestone 3 item; the guideline says "all apps". Whether Beta App Review enforces this for a
+      TestFlight-only build is not stated on the fetched pages. A short on-device-only policy and an
+      in-app link would close it; that is a product change, not made in this slice.
+
+  - id: AR-GL-5.1.1ii-consent
+    title: Collecting user or usage data needs consent and an easy way to withdraw it
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: data_leaves_device
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      5.1.1(ii): "Apps that collect user or usage data must secure user consent for the collection ...
+      Apps must also provide the customer with an easily accessible and understandable way to withdraw
+      consent."
+
+  - id: AR-GL-5.1.1iii-data-minimization
+    title: Request only data relevant to core features; prefer the out-of-process picker to full Photos access
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: photos
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      5.1.1(iii): "Where possible, use the out-of-process picker or a share sheet rather than requesting
+      full access to protected resources like Photos or Contacts."
+    notes: >
+      AddWantView uses PhotosPicker and the app receives images through its Share Extension; no
+      PHPhotoLibrary authorization or PHAsset fetch in the source (grep, 2026-11-02).
+
+  - id: AR-GL-5.1.1iv-respect-permissions
+    title: Don't trick or force consent; offer alternatives when permission is declined
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: always
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      5.1.1(iv): "Apps must respect the user's permission settings and not attempt to manipulate, trick,
+      or force people to consent to unnecessary data access ... Where possible, provide alternative
+      solutions for users who don't grant consent."
+    notes: >
+      By design the camera button is optional (Photos and Share remain) and reminders are optional, but
+      the app with each permission denied has not been run and observed yet. Slice 03.
+
+  - id: AR-GL-5.1.1v-no-login-required
+    title: Without significant account-based features, the app works without a login
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: always
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: met
+    requirement: >
+      5.1.1(v): "If your app doesn't include significant account-based features, let people use it
+      without a login."
+    notes: Milestones 1-2 have no login. Re-check when Milestone 3 sign-in lands (D-017).
+
+  - id: AR-GL-5.1.1v-account-deletion
+    title: An app that supports account creation offers account deletion inside the app
+    area: data_collection
+    source: https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage
+    checked: 2026-11-02
+    applies_when: account_signin
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      5.1.1(v): "If your app supports account creation, you must also offer account deletion within the
+      app."
+    notes: >
+      Milestone 3: the parent's account (D-017). If accounts are created only on the web or the
+      Display, the support page (AR-ACCT-deletion-scope) still requires deletion to be startable in the
+      app.
+
+  - id: AR-ACCT-deletion-scope
+    title: In-app account deletion removes the whole account and its personal data, not just deactivation
+    area: data_collection
+    source: https://developer.apple.com/support/offering-account-deletion-in-your-app/
+    checked: 2026-11-02
+    applies_when: account_signin
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      Deletion must be easy to find (typically account settings); "Offer to delete the entire account
+      record, along with associated personal data", including shared user-generated content such as
+      photos; "only offering to temporarily deactivate or disable an account is insufficient"; a direct
+      link to a web page that completes deletion is allowed; apps outside highly regulated industries
+      "should not require people to make a phone call, send an email"; apps that support Sign in with
+      Apple "should use the Sign in with Apple REST API to revoke user tokens".
+    notes: >
+      For WantWise this means the family's Wants, decisions and photos in Supabase are deleted with the
+      parent's account (Milestone 3).
+
+  # ---------------------------------------------------------------- App Review Guidelines: 5.1.2
+
+  - id: AR-GL-5.1.2-sharing-permission
+    title: No use, transmission or sharing of personal data without permission; disclose third parties
+    area: data_sharing
+    source: https://developer.apple.com/app-store/review/guidelines/#data-use-and-sharing
+    checked: 2026-11-02
+    applies_when: data_leaves_device
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      5.1.2(i): "you may not use, transmit, or share someone's personal data without first obtaining
+      their permission ... You must clearly disclose where personal data will be shared with third
+      parties, including with third-party AI, and obtain explicit permission before doing so".
+    notes: Supabase (Milestone 3) is a third party that would hold the family's data.
+
+  - id: AR-GL-5.1.2-no-required-system-features
+    title: The app doesn't require enabling notifications, location or tracking to use it
+    area: data_sharing
+    source: https://developer.apple.com/app-store/review/guidelines/#data-use-and-sharing
+    checked: 2026-11-02
+    applies_when: notifications
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      5.1.2(i): "Your app may not require users to enable system functionalities (such as push
+      notifications, location services, tracking) in order to access functionality, content, use the
+      app".
+    notes: >
+      Intended to be met (reminders are optional; D-029), but the app has not been run with
+      notifications denied. Slice 03.
+
+  - id: AR-PRIV-no-tracking
+    title: No tracking; ATT permission would be needed before any tracking
+    area: data_sharing
+    source: https://developer.apple.com/app-store/user-privacy-and-data-use/
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      Tracking is "linking user or device data collected from your app with user or device data
+      collected from other companies' apps, websites, or offline properties for targeted advertising or
+      advertising measurement purposes" or sharing with data brokers; it needs App Tracking Transparency
+      permission and an NSUserTrackingUsageDescription purpose string.
+    notes: >
+      Manifest declares NSPrivacyTracking false with no tracking domains; no AppTrackingTransparency
+      import or advertising identifier in the source (2026-11-02).
+
+  # ---------------------------------------------------------------- Privacy manifest
+
+  - id: AR-PM-present-in-each-bundle
+    title: PrivacyInfo.xcprivacy is in the app bundle and in the Share Extension bundle
+    area: privacy_manifest
+    source: https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      iOS apps place the manifest "at the root of your app's bundle"; the file name must be
+      PrivacyInfo.xcprivacy and it must be added to the target's resources. From the required-reason
+      page: "For each executable or dynamic library in an app that uses a required reason API, the
+      bundle that includes the executable or dynamic library needs to include a privacy manifest file
+      that reports the API."
+    notes: >
+      project.yml lists Config/PrivacyInfo.xcprivacy as a resource of both targets (lines 49, 74);
+      confirmed in both built bundles with Xcode 26.3 (docs/VERIFICATION.md, D-031).
+
+  - id: AR-PM-valid-keys
+    title: Every privacy manifest in the app is valid and has only expected keys and values
+    area: privacy_manifest
+    source: https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "All privacy manifest files in your app must be valid, containing only the expected keys and
+      values." "App Store Connect rejects app submissions that include invalid privacy manifest files."
+      Top-level keys: NSPrivacyTracking, NSPrivacyTrackingDomains, NSPrivacyCollectedDataTypes,
+      NSPrivacyAccessedAPITypes (Privacy manifest files page).
+    notes: The manifest has exactly the four top-level keys and parses with plistlib.
+
+  - id: AR-PM-tracking-domains
+    title: NSPrivacyTrackingDomains is listed only when NSPrivacyTracking is true
+    area: privacy_manifest
+    source: https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      NSPrivacyTracking: "When set to true you need to provide a list of internet domains in
+      NSPrivacyTrackingDomains." "To provide a list of internet domains in NSPrivacyTrackingDomains, set
+      NSPrivacyTracking to true."
+    notes: Tracking false, domains empty.
+
+  - id: AR-PM-collected-data-types
+    title: NSPrivacyCollectedDataTypes describes every data type the app collects
+    area: privacy_manifest
+    source: https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
+    checked: 2026-11-02
+    applies_when: data_leaves_device
+    milestone: 3
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: not_applicable_yet
+    requirement: >
+      The manifest records "The types of data collected by your app or third-party SDK. You need to
+      provide this information for your app or third-party SDK on all platforms."
+    notes: >
+      Empty today, which is true (nothing reaches us). Milestone 3 sync must add the collected types
+      (D-031).
+
+  - id: AR-RR-declared-reasons
+    title: Each required-reason API category used has an approved reason in the manifest
+    area: required_reason_api
+    source: https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "Starting May 1, 2024, apps that don't describe their use of required reason API in their privacy
+      manifest file aren't accepted by App Store Connect." Categories (NSPrivacyAccessedAPIType page):
+      NSPrivacyAccessedAPICategoryFileTimestamp, NSPrivacyAccessedAPICategorySystemBootTime,
+      NSPrivacyAccessedAPICategoryDiskSpace, NSPrivacyAccessedAPICategoryActiveKeyboards,
+      NSPrivacyAccessedAPICategoryUserDefaults. Declared reasons must match the app's real use, and the
+      APIs may not be used for tracking or fingerprinting.
+    notes: >
+      grep of WantWise/, WantWiseShare/, Shared/ and WantWiseCore/Sources for UserDefaults, @AppStorage,
+      file-date attributes, stat, disk-capacity, systemUptime, mach_absolute_time and activeInputModes
+      found none (2026-11-02), so NSPrivacyAccessedAPITypes is correctly empty. The exact API list per
+      category is on
+      https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype.
+
+  - id: AR-RR-third-party-sdk-manifest
+    title: A third-party SDK reports its own required-reason API use and data collection in its own manifest
+    area: required_reason_api
+    source: https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api
+    checked: 2026-11-02
+    applies_when: dependencies
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: not_applicable_yet
+    requirement: >
+      "Your third-party SDK can't rely on the privacy manifest files for apps that link the third-party
+      SDK ... to report your third-party SDK's use of required reasons API." SDKs on Apple's list need a
+      manifest and signature (Privacy manifest files page).
+    notes: No third-party dependencies today; the Supabase Swift SDK would bring this in at Milestone 3.
+
+  # ---------------------------------------------------------------- App Privacy details
+
+  - id: AR-APD-answers-in-asc
+    title: App Privacy answers are given in App Store Connect
+    area: app_privacy_details
+    source: https://developer.apple.com/app-store/app-privacy-details/
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#later-milestones
+    status_now: unknown
+    requirement: >
+      The information "is required to submit new apps and app updates to the App Store", entered in App
+      Store Connect.
+    notes: >
+      The page doesn't say whether TestFlight-only distribution needs these answers, so status is
+      unknown. If asked, today's correct answer is "Data Not Collected" (AR-APD-on-device-not-collected).
+
+  - id: AR-APD-on-device-not-collected
+    title: Data processed only on the device is not "collected"
+    area: app_privacy_details
+    source: https://developer.apple.com/app-store/app-privacy-details/
+    checked: 2026-11-02
+    applies_when: always
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: met
+    requirement: >
+      "'Collect' refers to transmitting data off the device in a way that allows you and/or your
+      third-party partners to access it for a period longer than what is necessary to service the
+      transmitted request in real time." "Data that is processed only on device is not 'collected' and
+      does not need to be disclosed".
+    notes: >
+      All Wants, photos and decisions stay on the device (D-031). Link previews contact the shared site,
+      not us or a partner of ours.
+
+  - id: AR-APD-privacy-policy-url
+    title: App Privacy needs a public privacy policy URL
+    area: app_privacy_details
+    source: https://developer.apple.com/app-store/app-privacy-details/
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#later-milestones
+    status_now: not_met
+    requirement: >
+      "Privacy Policy (Required): The URL to your publicly accessible privacy policy."
+    notes: No policy exists yet. See AR-GL-5.1.1i-privacy-policy.
+
+  - id: AR-APD-sync-collected
+    title: Data synced to our server is collected and must be disclosed
+    area: app_privacy_details
+    source: https://developer.apple.com/app-store/app-privacy-details/
+    checked: 2026-11-02
+    applies_when: data_leaves_device
+    milestone: 3
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#later-milestones
+    status_now: not_applicable_yet
+    requirement: >
+      Disclose all data collected unless it meets every optional-disclosure criterion; "Data types must
+      meet all criteria in order to be considered optional for disclosure."
+    notes: >
+      Supabase sync stores Wants, photos and decisions beyond the request, so they are collected and
+      disclosed (and declared in the manifest, AR-PM-collected-data-types).
+
+  # ---------------------------------------------------------------- TestFlight and Beta App Review
+
+  - id: AR-TF-first-build-review
+    title: The first build added to an external tester group goes through TestFlight App Review
+    area: testflight
+    source: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      "When you add the first build of your app to a group, the build gets sent to App Review to make
+      sure it follows the App Review Guidelines. A review is required only for the first build.
+      Subsequent builds may not require a full review." External testers: up to 10,000; internal: up to
+      100 App Store Connect users.
+    notes: WantWise's testers are external (APPLE_HANDOFF.md).
+
+  - id: AR-TF-test-information
+    title: External testing needs a Beta App Description and feedback email
+    area: testflight
+    source: https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-test-information
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      "In the Beta App Description text field, enter a description of your beta version. This field is
+      required." Feedback Email is where testers contact you. External testing needs "additional
+      TestFlight test information about your app for TestFlight App Review."
+
+  - id: AR-TF-build-expiry
+    title: A TestFlight build is testable for 90 days
+    area: testflight
+    source: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: not_applicable_yet
+    requirement: >
+      "You can test a build for up to 90 days." "Your build becomes unavailable for testers after 90
+      days."
+    notes: The child's app stops working when its build expires, so upload a fresh build within 90 days.
+
+  - id: AR-TF-tester-accounts
+    title: Tester Apple Accounts can use TestFlight (managed accounts in reserved domains can't; age rules unverified)
+    area: testflight
+    source: https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: unknown
+    requirement: >
+      "Managed Apple Accounts created in reserved domains can't be used to test builds." Testers install
+      the TestFlight app and accept an email invitation or public link.
+    notes: >
+      The page states no minimum tester age, and no Apple page on Apple Account age rules was fetched
+      in this attempt, so whether the child's own account can be a tester is unknown. APPLE_HANDOFF.md
+      already plans a family member's account as the fallback.
+
+  # ---------------------------------------------------------------- Export compliance
+
+  - id: AR-EXP-key-present
+    title: ITSAppUsesNonExemptEncryption is set in the app's Info.plist
+    area: export_compliance
+    source: https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      Set it to NO when the app, including linked libraries, "either uses no encryption, or only uses
+      encryption that's exempt from export compliance requirements". Without the key, App Store Connect
+      runs the export compliance questionnaire on every upload.
+    notes: Config/WantWise-Info.plist sets it to false.
+
+  - id: AR-EXP-value-true-to-code
+    title: The NO answer stays true; only OS-provided encryption is used
+    area: export_compliance
+    source: https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations
+    checked: 2026-11-02
+    applies_when: networking
+    check: review
+    test: checklist:.claude/agents/app-store-reviewer.md
+    status_now: met
+    requirement: >
+      "Typically, the use of encryption that's built into the operating system—for example, when your
+      app makes HTTPS connections using URLSession—is exempt from export documentation upload
+      requirements, whereas the use of proprietary encryption is not."
+    notes: >
+      The only network use is LPMetadataProvider (system HTTPS). Re-check if Milestone 3 adds Supabase or
+      any crypto library.
+
+  - id: AR-EXP-self-classification
+    title: Exempt encryption may still need a year-end self-classification report
+    area: export_compliance
+    source: https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APPLE_HANDOFF.md#testflight-and-testers
+    status_now: unknown
+    requirement: >
+      "If your app uses exempt forms of encryption, you might alternatively be required to submit a
+      year-end self-classification report to the U.S. government."
+    notes: >
+      Whether this applies to an app whose only encryption is the OS's HTTPS was not settled by the
+      pages fetched; Apple's "Determine and upload app encryption documentation" and the annual
+      self-classification pages were not fetched in this attempt. The account holder decides.
+
+  # ---------------------------------------------------------------- Purpose strings
+
+  - id: AR-PS-camera
+    title: NSCameraUsageDescription is present because the app opens the camera
+    area: purpose_strings
+    source: https://developer.apple.com/documentation/bundleresources/information-property-list/nscamerausagedescription
+    checked: 2026-11-02
+    applies_when: camera
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "This key is required if your app uses APIs that access the device's camera."
+    notes: >
+      CameraPicker.swift uses UIImagePickerController with the camera source; Config/WantWise-Info.plist
+      has the string (also in the built app, Xcode 26.3).
+
+  - id: AR-PS-photos-read
+    title: NSPhotoLibraryUsageDescription is present if the app reads or writes the photo library
+    area: purpose_strings
+    source: https://developer.apple.com/documentation/bundleresources/information-property-list/nsphotolibraryusagedescription
+    checked: 2026-11-02
+    applies_when: photos
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "This key is required if your app uses APIs that have read or write access to the user's photo
+      library." Apps that only add assets use NSPhotoLibraryAddUsageDescription instead.
+    notes: >
+      No PHPhotoLibrary or PHAsset access in the source, so no key is needed. Apple's PhotoKit privacy
+      article (developer.apple.com/documentation/photokit/delivering-an-enhanced-privacy-experience-in-your-photos-app,
+      fetched 2026-11-02) says the out-of-process PHPickerViewController needs no authorization; the
+      PhotosPicker page fetched doesn't restate that for SwiftUI's PhotosPicker, so slice 03 should
+      confirm no Photos prompt appears.
+
+  - id: AR-PS-photos-add
+    title: NSPhotoLibraryAddUsageDescription is present if the app saves to the photo library
+    area: purpose_strings
+    source: https://developer.apple.com/documentation/bundleresources/information-property-list/nsphotolibraryaddusagedescription
+    checked: 2026-11-02
+    applies_when: photos
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "This key is required if your app uses APIs that have write access to the user's photo library."
+    notes: The app never saves to the photo library, so no key is needed.
+
+  - id: AR-PS-notifications-in-context
+    title: Notification permission is requested in context, not at first launch
+    area: purpose_strings
+    source: https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications
+    checked: 2026-11-02
+    applies_when: notifications
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      "Because a person might consider notification-based interactions disruptive, you must obtain
+      permission to use them." "Make the request in a context that helps people understand why your app
+      needs authorization ... Sending the request in context provides a better experience than
+      automatically requesting authorization on first launch".
+    notes: >
+      Notifications have no Info.plist purpose-string key; the request itself is the control. The code
+      asks at the first waiting Want (ReminderScheduler.swift, D-029), but no test has yet observed that
+      no prompt appears at launch. Slice 03.
+
+  # ---------------------------------------------------------------- App icon
+
+  - id: AR-ICON-app-store-1024
+    title: The asset catalog app icon has a 1024x1024 image for the App Store
+    area: app_icon
+    source: https://developer.apple.com/documentation/xcode/configuring-your-app-icon
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: met
+    requirement: >
+      "If you distribute your app through the App Store, you must provide app icon imagery to use in the
+      App Store." iOS: "Drag an icon image to the iOS 1,024pt image well." iOS apps can generate all
+      variants "from a single 1024×1024 pixel image".
+    notes: Resources/Assets.xcassets/AppIcon.appiconset holds a 1024x1024 RGB image (docs/VERIFICATION.md).
+
+  - id: AR-ICON-square-color-space
+    title: The icon is a square, unmasked image in a supported color space
+    area: app_icon
+    source: https://developer.apple.com/design/human-interface-guidelines/app-icons
+    checked: 2026-11-02
+    applies_when: always
+    check: static
+    test: todo:02-static-compliance-checks
+    status_now: unknown
+    requirement: >
+      HIG specifications: iOS layout is square, 1024x1024 px; the system applies the rounded-corner
+      mask ("provide square layers so the system can apply rounded corners"). Supported color spaces:
+      sRGB, Gray Gamma 2.2, Display P3.
+    notes: >
+      Square size is met. The icon's color space has not been checked. The HIG page fetched doesn't
+      state a no-transparency rule; the repo's "no alpha" check comes from earlier work and slice 02's
+      spec, not from a page fetched in this attempt, so it is not recorded as an Apple requirement here.
+
+  # ---------------------------------------------------------------- Accessibility
+
+  - id: AR-A11Y-nutrition-labels
+    title: Accessibility Nutrition Labels in App Store Connect (voluntary now, required later)
+    area: accessibility
+    source: https://developer.apple.com/help/app-store-connect/manage-app-accessibility/overview-of-accessibility-nutrition-labels
+    checked: 2026-11-02
+    applies_when: release
+    check: person
+    test: checklist:docs/APP_STORE_COMPLIANCE.md#every-build-testflight
+    status_now: not_applicable_yet
+    requirement: >
+      "providing these labels will be voluntary to start ... over time, you'll be required to share
+      accessibility support details to submit new apps and app updates to the App Store." To claim a
+      feature, "users must be able to complete all of the common tasks of your app using that feature."
+      Features: VoiceOver, Voice Control, Larger Text, Dark Interface, Differentiate Without Color
+      Alone, Sufficient Contrast, Reduced Motion, Captions, Audio Descriptions.
+    notes: >
+      App Store product-page labels; not relevant to TestFlight-only distribution today. The App Review
+      Guidelines fetched contain no accessibility rule of their own (only "accessible for review").
+
+  - id: AR-A11Y-voiceover
+    title: Every control and meaningful image is described for VoiceOver
+    area: accessibility
+    source: https://developer.apple.com/design/human-interface-guidelines/accessibility
+    checked: 2026-11-02
+    applies_when: always
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      HIG: "Describe your app's interface and content for VoiceOver." Use Accessibility Inspector to
+      audit the interface.
+    notes: Icon-only buttons have accessibilityLabel in places (grep); no full audit has run. Slice 03.
+
+  - id: AR-A11Y-larger-text
+    title: Text enlarges to at least 200% (Dynamic Type)
+    area: accessibility
+    source: https://developer.apple.com/design/human-interface-guidelines/accessibility
+    checked: 2026-11-02
+    applies_when: always
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      HIG: "Ideally, give people the option to enlarge text by at least 200 percent". iOS default text
+      size 17 pt, minimum 11 pt.
+    notes: Dynamic Type is still 📝 in docs/VERIFICATION.md. Slice 03.
+
+  - id: AR-A11Y-contrast-and-color
+    title: Text contrast meets the minimum ratios and color isn't the only signal
+    area: accessibility
+    source: https://developer.apple.com/design/human-interface-guidelines/accessibility
+    checked: 2026-11-02
+    applies_when: always
+    check: simulator
+    test: todo:03-simulator-compliance-checks
+    status_now: unknown
+    requirement: >
+      HIG minimum contrast: 4.5:1 for text up to 17 pt, 3:1 for 18 pt and larger or bold text. "Convey
+      information with more than color alone."
+    notes: The app is dark-only (D-029), so only the dark appearance needs checking. Slice 03 audit.
